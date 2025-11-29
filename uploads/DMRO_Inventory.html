@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMRO Executive Dashboard - Strategic Inventory Overview</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #1e40af;
+            --primary-light: #3b82f6;
+            --accent-gold: #f59e0b;
+            --accent-emerald: #10b981;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --background: #ffffff;
+            --surface-white: #ffffff;
+            --surface-gray: #f8fafc;
+            --border-light: #e5e7eb;
+            --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --gradient-primary: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            --gradient-gold: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --gradient-emerald: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard-header { 
+            background: var(--gradient-primary);
+            color: white; 
+            padding: 2rem 0; 
+            text-align: center;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .executive-metrics {
+            margin-top: -1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .metric-card { 
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem 1rem; 
+            text-align: center; 
+            transition: all 0.2s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card:hover { 
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.1);
+        }
+
+        .metric-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-blue);
+        }
+
+        .metric-value { 
+            font-size: 2.25rem; 
+            font-weight: 700; 
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+
+        .metric-label { 
+            color: var(--text-secondary); 
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-trend {
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .trend-up { color: var(--accent-emerald); }
+        .trend-down { color: #ef4444; }
+
+        .chart-container { 
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem; 
+            margin-bottom: 1.5rem;
+            height: 350px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: var(--text-primary);
+            flex-shrink: 0;
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        .chart-wrapper canvas {
+            max-height: 100% !important;
+            width: 100% !important;
+        }
+
+        .section-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .table-container { 
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden; 
+            margin-bottom: 2rem;
+        }
+
+        .table-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .table-header h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .premium-table {
+            color: var(--text-primary);
+            background: transparent;
+            font-size: 0.85rem;
+        }
+
+        .premium-table th { 
+            background: var(--surface-gray);
+            color: var(--text-primary); 
+            font-weight: 600;
+            border: none;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .premium-table td { 
+            vertical-align: middle;
+            border: none;
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--surface-white);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .premium-table tbody tr:hover {
+            background: var(--surface-gray);
+        }
+
+        .premium-table strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .premium-table .grand-total-row {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
+        }
+
+        .premium-table .grand-total-row td {
+            background: transparent !important;
+            color: white !important;
+            font-weight: 600 !important;
+        }
+
+        .premium-table .mro-subtotal-row {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%) !important;
+            color: #1f2937 !important;
+        }
+
+        .premium-table .mro-subtotal-row td {
+            background: transparent !important;
+            color: #1f2937 !important;
+            font-weight: 600 !important;
+        }
+
+        .category-progress {
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .progress-premium { 
+            height: 6px; 
+            border-radius: 3px;
+            background: var(--surface-gray);
+            overflow: hidden;
+        }
+
+        .progress-bar-premium { 
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease-in-out;
+        }
+
+        .footer-premium { 
+            background: var(--surface-gray);
+            border-top: 1px solid var(--border-light);
+            color: var(--text-secondary); 
+            padding: 1.5rem; 
+            text-align: center; 
+            margin-top: 2rem;
+        }
+
+        .value-positive { color: var(--accent-emerald); }
+        .value-warning { color: var(--accent-gold); }
+        .value-danger { color: #ef4444; }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header-title { font-size: 2rem; }
+            .metric-card { padding: 2rem 1.5rem; }
+            .chart-container { padding: 2rem; height: 400px; }
+            .section-title { font-size: 1.75rem; }
+        }
+
+        /* Chart Legend Table */
+        .chart-legend-table {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 12px 8px;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .legend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 12px;
+            margin: 2px 0;
+            border-radius: 6px;
+            border-left: 3px solid transparent;
+            transition: all 0.15s ease;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateX(2px);
+        }
+
+        .legend-category {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.2;
+            flex: 1;
+            padding-right: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .legend-values {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .legend-amount {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .legend-percent-badge {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: white !important;
+            padding: 2px 6px;
+            border-radius: 8px;
+            line-height: 1;
+            text-align: center;
+            min-width: 28px;
+            display: inline-block;
+        }
+
+        /* Simplified color indicators */
+        .legend-item:nth-child(1) { border-left-color: #1e40af; }
+        .legend-item:nth-child(2) { border-left-color: #3b82f6; }
+        .legend-item:nth-child(3) { border-left-color: #10b981; }
+        .legend-item:nth-child(4) { border-left-color: #06b6d4; }
+        .legend-item:nth-child(5) { border-left-color: #f59e0b; }
+
+        .legend-category {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .legend-values {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .legend-amount {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            line-height: 1;
+        }
+
+        .legend-percent {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6b7280;
+            line-height: 1;
+        }
+
+        .legend-percent-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white !important;
+            padding: 3px 8px;
+            border-radius: 10px;
+            line-height: 1;
+            text-align: center;
+            min-width: 32px;
+            display: inline-block;
+        }
+
+        /* Category-specific badge colors */
+        .badge-blue-dark {
+            background: #1e40af !important;
+            box-shadow: 0 1px 4px rgba(30, 64, 175, 0.4);
+        }
+
+        .badge-blue {
+            background: #3b82f6 !important;
+            box-shadow: 0 1px 4px rgba(59, 130, 246, 0.4);
+        }
+
+        .badge-green {
+            background: #10b981 !important;
+            box-shadow: 0 1px 4px rgba(16, 185, 129, 0.4);
+        }
+
+        .badge-cyan {
+            background: #06b6d4 !important;
+            box-shadow: 0 1px 4px rgba(6, 182, 212, 0.4);
+        }
+
+        .badge-orange {
+            background: #f59e0b !important;
+            box-shadow: 0 1px 4px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Adjust chart wrapper for side-by-side layout */
+        .chart-wrapper {
+            height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Container adjustments for better integration */
+        .chart-container {
+            overflow: hidden;
+        }
+
+        /* Legend Header for visual alignment */
+        .legend-header {
+            padding-left: 0;
+        }
+
+        .legend-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            line-height: 1.3;
+        }
+
+        .legend-title i {
+            color: var(--accent-blue);
+            font-size: 0.9rem;
+        }
+
+        /* Enhanced chart title positioning */
+        .chart-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 16px !important;
+            font-size: 1.1rem;
+        }
+
+        .chart-title i {
+            color: var(--accent-blue);
+        }
+
+        /* Filter Panel Styles */
+        .filter-panel {
+            background: var(--surface-white);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .filter-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.65rem 0.75rem;
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--surface-white);
+            color: var(--text-primary);
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .btn-filter {
+            padding: 0.65rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-filter-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-filter-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-filter-secondary {
+            background: var(--surface-gray);
+            color: var(--text-primary);
+            border: 2px solid var(--border-light);
+        }
+
+        .btn-filter-secondary:hover {
+            background: var(--border-light);
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.75rem;
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .filter-tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+            margin-left: 0.25rem;
+        }
+
+        .filter-tag .remove:hover {
+            opacity: 1;
+        }
+
+        /* Enhanced Table Interactivity */
+        .premium-table tbody tr {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .premium-table tbody tr:hover {
+            background: rgba(30, 64, 175, 0.05) !important;
+            transform: translateX(3px);
+        }
+
+        .premium-table th {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .premium-table th:hover {
+            background: rgba(30, 64, 175, 0.1);
+        }
+
+        .premium-table th::after {
+            content: '⇅';
+            position: absolute;
+            right: 8px;
+            opacity: 0.3;
+            font-size: 0.75rem;
+        }
+
+        .row-expanded {
+            background: rgba(30, 64, 175, 0.05) !important;
+        }
+
+        .detail-row {
+            background: var(--surface-gray) !important;
+            font-size: 0.8rem;
+        }
+
+        .detail-row td {
+            padding: 1rem !important;
+        }
+
+        .detail-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 0.5rem;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--primary-blue);
+        }
+
+        .detail-item label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-item value {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Chart Click Indicator */
+        .chart-clickable {
+            cursor: pointer;
+        }
+
+        .chart-container {
+            transition: all 0.3s ease;
+        }
+
+        .chart-container:hover {
+            box-shadow: var(--shadow-large);
+        }
+
+        /* Comparison Mode Styles */
+        .comparison-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            background: rgba(30, 64, 175, 0.1);
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        /* Insights Panel */
+        .insights-panel {
+            background: linear-gradient(135deg, rgba(30, 64, 175, 0.05), rgba(16, 185, 129, 0.05));
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .insights-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insight-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--primary-blue);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .insight-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        /* Active Filter State */
+        .filter-panel.active {
+            border: 2px solid var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1), var(--shadow-large);
+        }
+
+        .dashboard-filtered .executive-metrics,
+        .dashboard-filtered .chart-container,
+        .dashboard-filtered .insights-panel {
+            animation: pulseHighlight 0.6s ease;
+        }
+
+        @keyframes pulseHighlight {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(30, 64, 175, 0.3); }
+        }
+
+        /* Chart Active State */
+        .chart-container.active {
+            border: 2px solid var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.15), var(--shadow-large);
+        }
+
+        /* Metric Card Active State */
+        .metric-card.updating {
+            animation: metricUpdate 0.5s ease;
+        }
+
+        @keyframes metricUpdate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), rgba(16, 185, 129, 0.1)); }
+        }
+
+        /* Table Row Active State */
+        .premium-table tbody tr.filtered-in {
+            background: linear-gradient(90deg, rgba(30, 64, 175, 0.08), transparent) !important;
+            border-left: 4px solid var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .premium-table tbody tr.filtered-out {
+            opacity: 0.3;
+            filter: grayscale(70%);
+        }
+
+        /* Filter Status Banner */
+        .filter-status-banner {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-medium);
+            animation: slideDown 0.3s ease;
+        }
+
+        .filter-status-banner.active {
+            display: flex;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-status-banner i {
+            font-size: 1.2rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Chart Click Hint */
+        .chart-container::before {
+            content: '👆 Click chart elements to filter';
+            position: absolute;
+            top: -8px;
+            right: 15px;
+            background: var(--primary-blue);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .chart-container:hover::before {
+            opacity: 1;
+        }
+
+        /* Insights Panel Active */
+        .insights-panel.updated {
+            animation: insightUpdate 0.5s ease;
+        }
+
+        @keyframes insightUpdate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); border-color: var(--primary-blue); }
+        }
+
+        /* Connection Lines Visual Effect */
+        .visual-connector {
+            position: relative;
+        }
+
+        .visual-connector::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -1rem;
+            width: 2px;
+            height: 1rem;
+            background: linear-gradient(to bottom, var(--primary-blue), transparent);
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .visual-connector.active::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .filter-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-actions {
+                flex-direction: column;
+            }
+            
+            .btn-filter {
+                width: 100%;
+            }
+        }
+
+        /* ======================================
+           LEFT SIDEBAR LAYOUT STYLES
+           ====================================== */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .left-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+            border-right: 2px solid var(--border-light);
+            box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+            overflow-y: auto;
+            z-index: 1000;
+            padding: 20px 0;
+        }
+
+        .left-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .left-sidebar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .left-sidebar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .sidebar-header {
+            padding: 15px 20px;
+            border-bottom: 2px solid var(--border-light);
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            color: white;
+            margin: 0;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-section {
+            padding: 0 20px;
+            margin-bottom: 25px;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-content {
+            margin-left: 300px;
+            flex: 1;
+            padding: 0;
+            background: var(--background);
+        }
+
+        .content-wrapper {
+            padding: 0 30px 30px 30px;
+        }
+
+        /* Sidebar Filter Styles */
+        .sidebar .filter-group {
+            margin-bottom: 18px;
+        }
+
+        .sidebar .filter-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar .filter-group select,
+        .sidebar .filter-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .sidebar .filter-group select:focus,
+        .sidebar .filter-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+        }
+
+        .sidebar .filter-group input[type="number"] {
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Smart Insights Panel in Sidebar */
+        .sidebar .insights-panel {
+            background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+            border: 2px solid var(--accent-gold);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0;
+        }
+
+        .sidebar .insights-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #856404;
+        }
+
+        .insight-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            border-left: 3px solid var(--accent-gold);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-value {
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        /* Active Filter Tags in Sidebar */
+        .active-filters-container {
+            padding: 15px 20px;
+            background: var(--surface-gray);
+            border-top: 2px solid var(--border-light);
+            border-bottom: 2px solid var(--border-light);
+            margin: 20px 0;
+        }
+
+        .active-filters-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .active-filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin: 3px;
+            font-weight: 500;
+        }
+
+        .active-filter-tag .remove-filter {
+            cursor: pointer;
+            font-weight: 700;
+            margin-left: 4px;
+            opacity: 0.8;
+        }
+
+        .active-filter-tag .remove-filter:hover {
+            opacity: 1;
+        }
+
+        /* Sidebar Buttons */
+        .sidebar-reset-btn {
+            width: calc(100% - 40px);
+            margin: 10px 20px;
+            padding: 10px;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .sidebar-reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .sidebar-export-btn {
+            background: linear-gradient(135deg, #28a745, #218838);
+            box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .sidebar-export-btn:hover {
+            box-shadow: 0 5px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .left-sidebar {
+                width: 260px;
+            }
+            .main-content {
+                margin-left: 260px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .left-sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 2px solid var(--border-light);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- LEFT SIDEBAR -->
+        <aside class="left-sidebar sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-sliders-h"></i> Control Panel</h3>
+            </div>
+
+            <!-- FILTERS SECTION -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-filter"></i> Advanced Filters
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter"><i class="fas fa-tag me-1"></i>Category</label>
+                    <select id="categoryFilter">
+                        <option value="all">All Categories</option>
+                        <option value="Drilling - Dorra">Drilling - Dorra</option>
+                        <option value="Drilling Operations">Drilling Operations</option>
+                        <option value="General Items">General Items</option>
+                        <option value="Chemicals & PPE">Chemicals & PPE</option>
+                        <option value="Spare Parts">Spare Parts</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="stockTypeFilter"><i class="fas fa-warehouse me-1"></i>Stock Type</label>
+                    <select id="stockTypeFilter">
+                        <option value="all">All Stock Types</option>
+                        <option value="non-safety">Non-Safety Stock</option>
+                        <option value="safety">Safety Stock</option>
+                        <option value="writeoff">Write-Off</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="mroFilter"><i class="fas fa-wrench me-1"></i>MRO Classification</label>
+                    <select id="mroFilter">
+                        <option value="all">All Items</option>
+                        <option value="mro">MRO Only</option>
+                        <option value="non-mro">Non-MRO Only</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="minValue"><i class="fas fa-dollar-sign me-1"></i>Min Value ($M)</label>
+                    <input type="number" id="minValue" placeholder="0" min="0" step="0.1">
+                </div>
+                <div class="filter-group">
+                    <label for="maxValue"><i class="fas fa-dollar-sign me-1"></i>Max Value ($M)</label>
+                    <input type="number" id="maxValue" placeholder="100" min="0" step="0.1">
+                </div>
+                <div class="filter-group">
+                    <label for="minItems"><i class="fas fa-boxes me-1"></i>Min Items</label>
+                    <input type="number" id="minItems" placeholder="0" min="0">
+                </div>
+            </div>
+
+            <!-- ACTIVE FILTERS SECTION -->
+            <div class="active-filters-container" id="activeFiltersContainer" style="display: none;">
+                <div class="active-filters-title">Active Filters</div>
+                <div id="activeFilters"></div>
+            </div>
+
+            <!-- RESET BUTTON -->
+            <button class="sidebar-reset-btn" onclick="resetFilters()">
+                <i class="fas fa-redo"></i> Reset All Filters
+            </button>
+
+            <!-- SMART INSIGHTS SECTION -->
+            <div class="sidebar-section">
+                <div class="insights-panel">
+                    <div class="insights-title">
+                        <i class="fas fa-lightbulb"></i> Smart Insights
+                    </div>
+                    <div id="insightsContent">
+                        <!-- Insights will be dynamically generated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXPORT BUTTON -->
+            <button class="sidebar-reset-btn sidebar-export-btn" onclick="exportFilteredData()">
+                <i class="fas fa-download"></i> Export to CSV
+            </button>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <div class="header-logo mb-3">
+                    <img src="kjo.png" alt="Company Logo" style="max-height: 50px; width: auto;">
+                </div>
+                <h1 class="header-title">DMRO - Inventory Dashboard</h1>
+                <p class="header-subtitle">Strategic Inventory Overview | September 14, 2025</p>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Filter Status Banner -->
+                <div class="filter-status-banner" id="filterStatusBanner" style="display: none;">
+                    <i class="fas fa-sync-alt"></i>
+                    <span id="filterStatusText">Filters Active - Dashboard Updated</span>
+                </div>
+
+        <!-- Executive Key Metrics -->
+        <div class="executive-metrics">
+            <div class="row g-3 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="metric-value" id="totalItems">46,260</div>
+                        <div class="metric-label">Total Inventory Items</div>
+                        <div class="comparison-badge" id="itemsComparison" style="display: none;"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="metric-value value-positive" id="totalValue">$152.7M</div>
+                        <div class="metric-label">Total Inventory Value</div>
+                        <div class="comparison-badge" id="valueComparison" style="display: none;"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="metric-value value-warning" id="mroCoverage">54.7%</div>
+                        <div class="metric-label">MRO Coverage Rate</div>
+                        <div class="progress-premium mt-3">
+                            <div class="progress-bar-premium" id="mroProgress" style="width: 54.7%; background: var(--gradient-gold);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="metric-value value-danger" id="writeOffValue">$3.37M</div>
+                        <div class="metric-label">Write-Off Exposure</div>
+                        <div class="comparison-badge" id="writeOffComparison" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Title -->
+        <h2 class="section-title">Inventory Analytics</h2>
+
+        <!-- Charts Section -->
+        <div class="row g-3 mb-4">
+            <!-- Category Breakdown Chart -->
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <div class="row align-items-start">
+                        <div class="col-md-7">
+                            <h4 class="chart-title mb-3">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Inventory Value Distribution
+                            </h4>
+                            <div class="chart-wrapper">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="legend-header mb-3">
+                                <h5 class="legend-title">
+                                    <i class="fas fa-list-ul me-2"></i>
+                                    Category Breakdown
+                                </h5>
+                            </div>
+                            <!-- Value Table -->
+                            <div class="chart-legend-table">
+                                <div class="legend-item">
+                                    <div class="legend-category">Drilling - Dorra</div>
+                                    <div class="legend-values">
+                                        <span class="legend-amount">$24.2M</span>
+                                        <span class="legend-percent-badge badge-blue-dark">16%</span>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-category">Drilling Operations</div>
+                                    <div class="legend-values">
+                                        <span class="legend-amount">$44.9M</span>
+                                        <span class="legend-percent-badge badge-blue">29%</span>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-category">General Items</div>
+                                    <div class="legend-values">
+                                        <span class="legend-amount">$3.9M</span>
+                                        <span class="legend-percent-badge badge-green">3%</span>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-category">Chemicals & PPE</div>
+                                    <div class="legend-values">
+                                        <span class="legend-amount">$5.3M</span>
+                                        <span class="legend-percent-badge badge-cyan">3%</span>
+                                    </div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-category">Spare Parts</div>
+                                    <div class="legend-values">
+                                        <span class="legend-amount">$74.4M</span>
+                                        <span class="legend-percent-badge badge-orange">49%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Safety vs Non-Safety Chart -->
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h4 class="chart-title">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Inventory Stock Analysis
+                    </h4>
+                    <div class="chart-wrapper">
+                        <canvas id="safetyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Executive Summary Table -->
+        <h2 class="section-title">Executive Summary Table</h2>
+        <div class="row">
+            <div class="col-12">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h4>
+                            <i class="fas fa-table me-2"></i>
+                            Detailed Inventory Analysis
+                        </h4>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table premium-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-tag me-2"></i>Category</th>
+                                    <th><i class="fas fa-warehouse me-2"></i>Non-Safety Stock</th>
+                                    <th><i class="fas fa-shield-alt me-2"></i>Safety Stock</th>
+                                    <th><i class="fas fa-exclamation-circle me-2"></i>Write-Off</th>
+                                    <th><i class="fas fa-boxes me-2"></i>Total Items</th>
+                                    <th><i class="fas fa-percentage me-2"></i>Items %</th>
+                                    <th><i class="fas fa-dollar-sign me-2"></i>Total Value</th>
+                                    <th><i class="fas fa-chart-pie me-2"></i>Value %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong class="text-primary">Drilling - Dorra</strong></td>
+                                    <td>120 / <span class="value-positive">$24.2M</span></td>
+                                    <td class="text-muted">-</td>
+                                    <td class="text-muted">-</td>
+                                    <td><strong>120</strong></td>
+                                    <td><span class="badge bg-secondary">0%</span></td>
+                                    <td><strong class="value-positive">$24.2M</strong></td>
+                                    <td><span class="badge" style="background: var(--gradient-primary);">16%</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong class="text-info">Drilling Operations</strong></td>
+                                    <td>2,329 / <span class="value-positive">$44.7M</span></td>
+                                    <td class="text-muted">-</td>
+                                    <td>7 / <span class="value-danger">$0.2M</span></td>
+                                    <td><strong>2,336</strong></td>
+                                    <td><span class="badge bg-info">5%</span></td>
+                                    <td><strong class="value-positive">$44.9M</strong></td>
+                                    <td><span class="badge bg-info">29%</span></td>
+                                </tr>
+                                <tr style="background: rgba(16, 185, 129, 0.1);">
+                                    <td><strong class="text-success">General Items</strong></td>
+                                    <td>12,106 / <span class="value-positive">$1.3M</span></td>
+                                    <td>2,184 / <span class="value-positive">$2.5M</span></td>
+                                    <td>42 / <span class="value-danger">$0.1M</span></td>
+                                    <td><strong>14,332</strong></td>
+                                    <td><span class="badge bg-success">31%</span></td>
+                                    <td><strong class="value-positive">$3.9M</strong></td>
+                                    <td><span class="badge bg-success">3%</span></td>
+                                </tr>
+                                <tr style="background: rgba(0, 115, 230, 0.1);">
+                                    <td><strong class="text-info">Chemicals & PPE</strong></td>
+                                    <td>1,557 / <span class="value-positive">$0.9M</span></td>
+                                    <td>404 / <span class="value-positive">$4.4M</span></td>
+                                    <td>8 / <span class="value-danger">$0.0M</span></td>
+                                    <td><strong>1,969</strong></td>
+                                    <td><span class="badge bg-info">4%</span></td>
+                                    <td><strong class="value-positive">$5.3M</strong></td>
+                                    <td><span class="badge bg-info">3%</span></td>
+                                </tr>
+                                <tr style="background: rgba(245, 158, 11, 0.1);">
+                                    <td><strong class="text-warning">Spare Parts</strong></td>
+                                    <td>13,246 / <span class="value-positive">$11.4M</span></td>
+                                    <td>13,978 / <span class="value-positive">$59.9M</span></td>
+                                    <td>279 / <span class="value-danger">$3.0M</span></td>
+                                    <td><strong>27,503</strong></td>
+                                    <td><span class="badge bg-warning">59%</span></td>
+                                    <td><strong class="value-positive">$74.4M</strong></td>
+                                    <td><span class="badge bg-warning">49%</span></td>
+                                </tr>
+                                <tr class="grand-total-row">
+                                    <td><strong>GRAND TOTAL</strong></td>
+                                    <td><strong>29,358 / $82.5M</strong></td>
+                                    <td><strong>16,566 / $66.8M</strong></td>
+                                    <td><strong>336 / $3.4M</strong></td>
+                                    <td><strong>46,260</strong></td>
+                                    <td><strong>100%</strong></td>
+                                    <td><strong>$152.7M</strong></td>
+                                    <td><strong>100%</strong></td>
+                                </tr>
+                                <tr class="mro-subtotal-row">
+                                    <td><strong>MRO Subtotal</strong></td>
+                                    <td><strong>26,909 / $13.7M</strong></td>
+                                    <td><strong>16,566 / $66.8M</strong></td>
+                                    <td><strong>329 / $3.1M</strong></td>
+                                    <td><strong>43,804</strong></td>
+                                    <td><strong>95%</strong></td>
+                                    <td><strong>$83.6M</strong></td>
+                                    <td><strong>55%</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                <footer class="footer-premium">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-md-12 text-center">
+                                <p class="mb-0">© 2025 DMRO Executive Dashboard</p>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div> <!-- /content-wrapper -->
+        </main> <!-- /main-content -->
+    </div> <!-- /dashboard-layout -->
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Inventory Data Structure
+        const inventoryData = [
+            {
+                category: 'Drilling - Dorra',
+                nonSafety: { items: 120, value: 24.2 },
+                safety: { items: 0, value: 0 },
+                writeoff: { items: 0, value: 0 },
+                isMRO: false
+            },
+            {
+                category: 'Drilling Operations',
+                nonSafety: { items: 2329, value: 44.7 },
+                safety: { items: 0, value: 0 },
+                writeoff: { items: 7, value: 0.2 },
+                isMRO: false
+            },
+            {
+                category: 'General Items',
+                nonSafety: { items: 12106, value: 1.3 },
+                safety: { items: 2184, value: 2.5 },
+                writeoff: { items: 42, value: 0.1 },
+                isMRO: true
+            },
+            {
+                category: 'Chemicals & PPE',
+                nonSafety: { items: 1557, value: 0.9 },
+                safety: { items: 404, value: 4.4 },
+                writeoff: { items: 8, value: 0.0 },
+                isMRO: true
+            },
+            {
+                category: 'Spare Parts',
+                nonSafety: { items: 13246, value: 11.4 },
+                safety: { items: 13978, value: 59.9 },
+                writeoff: { items: 279, value: 3.0 },
+                isMRO: true
+            }
+        ];
+
+        let filteredData = [...inventoryData];
+        let charts = {};
+        const totalInventory = { items: 46260, value: 152.7 };
+
+        // Initialize dashboard
+        function initDashboard() {
+            createCharts();
+            updateInsights();
+            makeTableInteractive();
+        }
+
+        // Apply Filters
+        function applyFilters() {
+            const category = document.getElementById('categoryFilter').value;
+            const stockType = document.getElementById('stockTypeFilter').value;
+            const mro = document.getElementById('mroFilter').value;
+            const minValue = parseFloat(document.getElementById('minValue').value) || 0;
+            const maxValue = parseFloat(document.getElementById('maxValue').value) || Infinity;
+            const minItems = parseInt(document.getElementById('minItems').value) || 0;
+
+            filteredData = inventoryData.filter(item => {
+                const totalValue = item.nonSafety.value + item.safety.value + item.writeoff.value;
+                const totalItems = item.nonSafety.items + item.safety.items + item.writeoff.items;
+
+                if (category !== 'all' && item.category !== category) return false;
+                if (mro === 'mro' && !item.isMRO) return false;
+                if (mro === 'non-mro' && item.isMRO) return false;
+                if (totalValue < minValue || totalValue > maxValue) return false;
+                if (totalItems < minItems) return false;
+
+                // Stock type filter logic
+                if (stockType !== 'all') {
+                    if (stockType === 'non-safety' && item.nonSafety.items === 0) return false;
+                    if (stockType === 'safety' && item.safety.items === 0) return false;
+                    if (stockType === 'writeoff' && item.writeoff.items === 0) return false;
+                }
+
+                return true;
+            });
+
+            updateDashboard();
+            updateActiveFilters();
+            updateInsights();
+        }
+
+        // Reset Filters
+        function resetFilters() {
+            document.getElementById('categoryFilter').value = 'all';
+            document.getElementById('stockTypeFilter').value = 'all';
+            document.getElementById('mroFilter').value = 'all';
+            document.getElementById('minValue').value = '';
+            document.getElementById('maxValue').value = '';
+            document.getElementById('minItems').value = '';
+
+            filteredData = [...inventoryData];
+            updateDashboard();
+            updateActiveFilters();
+            updateInsights();
+        }
+
+        // Update Dashboard
+        function updateDashboard() {
+            updateMetrics();
+            updateCharts();
+            updateTable();
+        }
+
+        // Update Metrics
+        function updateMetrics() {
+            // Add animation to metric cards
+            document.querySelectorAll('.metric-card').forEach(card => {
+                card.classList.add('updating');
+                setTimeout(() => card.classList.remove('updating'), 500);
+            });
+
+            let totalItems = 0;
+            let totalValue = 0;
+            let mroValue = 0;
+            let writeoffValue = 0;
+
+            filteredData.forEach(item => {
+                const itemTotal = item.nonSafety.items + item.safety.items + item.writeoff.items;
+                const valueTotal = item.nonSafety.value + item.safety.value + item.writeoff.value;
+                
+                totalItems += itemTotal;
+                totalValue += valueTotal;
+                writeoffValue += item.writeoff.value;
+                
+                if (item.isMRO) {
+                    mroValue += valueTotal;
+                }
+            });
+
+            const mroCoverage = totalValue > 0 ? ((mroValue / totalValue) * 100).toFixed(1) : 0;
+            const isFiltered = filteredData.length < inventoryData.length;
+
+            document.getElementById('totalItems').textContent = totalItems.toLocaleString();
+            document.getElementById('totalValue').textContent = `$${totalValue.toFixed(1)}M`;
+            document.getElementById('mroCoverage').textContent = `${mroCoverage}%`;
+            document.getElementById('writeOffValue').textContent = `$${writeoffValue.toFixed(2)}M`;
+            document.getElementById('mroProgress').style.width = `${mroCoverage}%`;
+
+            // Show comparison badges
+            if (isFiltered) {
+                const itemsPercent = ((totalItems / totalInventory.items) * 100).toFixed(1);
+                const valuePercent = ((totalValue / totalInventory.value) * 100).toFixed(1);
+                
+                document.getElementById('itemsComparison').style.display = 'inline-flex';
+                document.getElementById('itemsComparison').innerHTML = `<i class="fas fa-filter me-1"></i>${itemsPercent}% of total`;
+                
+                document.getElementById('valueComparison').style.display = 'inline-flex';
+                document.getElementById('valueComparison').innerHTML = `<i class="fas fa-filter me-1"></i>${valuePercent}% of total`;
+            } else {
+                document.getElementById('itemsComparison').style.display = 'none';
+                document.getElementById('valueComparison').style.display = 'none';
+            }
+        }
+
+        // Update Active Filters
+        function updateActiveFilters() {
+            const container = document.getElementById('activeFilters');
+            container.innerHTML = '';
+
+            const filters = [];
+            const category = document.getElementById('categoryFilter').value;
+            const stockType = document.getElementById('stockTypeFilter').value;
+            const mro = document.getElementById('mroFilter').value;
+            const minValue = document.getElementById('minValue').value;
+            const maxValue = document.getElementById('maxValue').value;
+            const minItems = document.getElementById('minItems').value;
+
+            if (category !== 'all') filters.push({ label: `Category: ${category}`, field: 'categoryFilter' });
+            if (stockType !== 'all') filters.push({ label: `Stock: ${stockType}`, field: 'stockTypeFilter' });
+            if (mro !== 'all') filters.push({ label: `${mro.toUpperCase()}`, field: 'mroFilter' });
+            if (minValue) filters.push({ label: `Min: $${minValue}M`, field: 'minValue' });
+            if (maxValue) filters.push({ label: `Max: $${maxValue}M`, field: 'maxValue' });
+            if (minItems) filters.push({ label: `Min Items: ${minItems}`, field: 'minItems' });
+
+            filters.forEach(filter => {
+                const tag = document.createElement('div');
+                tag.className = 'active-filter-tag';
+                tag.innerHTML = `${filter.label} <span class="remove-filter" onclick="removeFilter('${filter.field}')">✕</span>`;
+                container.appendChild(tag);
+            });
+        }
+
+        // Remove Filter
+        function removeFilter(field) {
+            if (field === 'minValue' || field === 'maxValue' || field === 'minItems') {
+                document.getElementById(field).value = '';
+            } else {
+                document.getElementById(field).value = 'all';
+            }
+            applyFilters();
+        }
+
+        // Update Insights
+        function updateInsights() {
+            // Add animation to insights panel
+            const panel = document.getElementById('insightsPanel');
+            panel.classList.add('updated');
+            setTimeout(() => panel.classList.remove('updated'), 500);
+
+            const container = document.getElementById('insightsContent');
+            container.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div class="insight-item"><div class="insight-value">No data matches the current filters</div></div>';
+                return;
+            }
+
+            // Calculate insights
+            const highestValue = filteredData.reduce((max, item) => {
+                const total = item.nonSafety.value + item.safety.value + item.writeoff.value;
+                return total > max.value ? { category: item.category, value: total } : max;
+            }, { category: '', value: 0 });
+
+            const highestWriteoff = filteredData.reduce((max, item) => {
+                return item.writeoff.value > max.value ? { category: item.category, value: item.writeoff.value } : max;
+            }, { category: '', value: 0 });
+
+            let totalSafety = 0, totalNonSafety = 0;
+            filteredData.forEach(item => {
+                totalSafety += item.safety.value;
+                totalNonSafety += item.nonSafety.value;
+            });
+
+            // Display insights
+            const insights = [];
+            
+            if (highestValue.value > 0) {
+                insights.push({
+                    label: 'Highest Value Category',
+                    value: `${highestValue.category} - $${highestValue.value.toFixed(1)}M`
+                });
+            }
+
+            if (highestWriteoff.value > 0) {
+                insights.push({
+                    label: 'Highest Write-Off Risk',
+                    value: `${highestWriteoff.category} - $${highestWriteoff.value.toFixed(2)}M`
+                });
+            }
+
+            const safetyRatio = ((totalSafety / (totalSafety + totalNonSafety)) * 100).toFixed(1);
+            insights.push({
+                label: 'Safety Stock Ratio',
+                value: `${safetyRatio}% of total inventory value`
+            });
+
+            insights.push({
+                label: 'Categories Displayed',
+                value: `${filteredData.length} of ${inventoryData.length} categories`
+            });
+
+            insights.forEach(insight => {
+                const div = document.createElement('div');
+                div.className = 'insight-item';
+                div.innerHTML = `
+                    <div class="insight-label">${insight.label}</div>
+                    <div class="insight-value">${insight.value}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Export Filtered Data
+        function exportFilteredData() {
+            let csv = 'Category,Non-Safety Items,Non-Safety Value,Safety Items,Safety Value,Write-Off Items,Write-Off Value,Total Items,Total Value\n';
+            
+            filteredData.forEach(item => {
+                const totalItems = item.nonSafety.items + item.safety.items + item.writeoff.items;
+                const totalValue = item.nonSafety.value + item.safety.value + item.writeoff.value;
+                csv += `${item.category},${item.nonSafety.items},${item.nonSafety.value},${item.safety.items},${item.safety.value},${item.writeoff.items},${item.writeoff.value},${totalItems},${totalValue}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dmro_inventory_filtered_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
+        // Make Table Interactive
+        function makeTableInteractive() {
+            const rows = document.querySelectorAll('.premium-table tbody tr');
+            rows.forEach((row, index) => {
+                if (!row.classList.contains('grand-total-row') && !row.classList.contains('mro-subtotal-row')) {
+                    row.style.cursor = 'pointer';
+                    row.addEventListener('click', function() {
+                        const category = this.querySelector('td:first-child strong').textContent;
+                        document.getElementById('categoryFilter').value = category;
+                        applyFilters();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            });
+        }
+
+        // Update Table
+        function updateTable() {
+            // Highlight filtered rows
+            const rows = document.querySelectorAll('.premium-table tbody tr');
+            rows.forEach(row => {
+                if (!row.classList.contains('grand-total-row') && !row.classList.contains('mro-subtotal-row')) {
+                    const categoryCell = row.querySelector('td:first-child strong');
+                    if (categoryCell) {
+                        const category = categoryCell.textContent;
+                        const isFiltered = filteredData.some(item => item.category === category);
+                        
+                        // Remove all classes first
+                        row.classList.remove('filtered-in', 'filtered-out');
+                        
+                        if (filteredData.length < inventoryData.length) {
+                            if (isFiltered) {
+                                row.classList.add('filtered-in');
+                            } else {
+                                row.classList.add('filtered-out');
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Enhanced Category Doughnut Chart with clean styling
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Drilling - Dorra', 'Drilling Operations', 'General Items', 'Chemicals & PPE', 'Spare Parts'],
+                datasets: [{
+                    data: [24.2, 44.9, 3.9, 5.3, 74.4],
+                    backgroundColor: [
+                        '#1e40af',
+                        '#3b82f6', 
+                        '#10b981',
+                        '#06b6d4',
+                        '#f59e0b'
+                    ],
+                    borderColor: [
+                        '#1e40af',
+                        '#3b82f6',
+                        '#10b981',
+                        '#06b6d4',
+                        '#f59e0b'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1,
+                plugins: { 
+                    legend: { 
+                        position: 'bottom',
+                        labels: {
+                            color: '#1f2937',
+                            padding: 15,
+                            font: {
+                                size: 12,
+                                weight: 500
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.parsed / 152.7) * 100).toFixed(1);
+                                return `${context.label}: $${context.parsed}M (${percentage}%)`;
+                            },
+                            afterLabel: function() {
+                                return '💡 Click to filter by category';
+                            }
+                        }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const category = ['Drilling - Dorra', 'Drilling Operations', 'General Items', 'Chemicals & PPE', 'Spare Parts'][index];
+                        
+                        // Visual feedback
+                        const chartContainer = document.getElementById('categoryChart').closest('.chart-container');
+                        chartContainer.classList.add('active');
+                        setTimeout(() => chartContainer.classList.remove('active'), 2000);
+                        
+                        document.getElementById('categoryFilter').value = category;
+                        applyFilters();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+                cutout: '60%',
+                layout: {
+                    padding: {
+                        top: 10,
+                        bottom: 10
+                    }
+                }
+            }
+        });
+        charts.category = categoryChart;
+
+        // Enhanced Safety vs Non-Safety Bar Chart
+        const safetyCtx = document.getElementById('safetyChart').getContext('2d');
+        const safetyChart = new Chart(safetyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Non-Safety Stock', 'Safety Stock', 'Write-Off Assets'],
+                datasets: [{
+                    label: 'Inventory Value ($M)',
+                    data: [82.5, 66.8, 3.4],
+                    backgroundColor: [
+                        '#10b981',
+                        '#3b82f6',
+                        '#ef4444'
+                    ],
+                    borderColor: [
+                        '#10b981',
+                        '#3b82f6',
+                        '#ef4444'
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 6,
+                    hoverBackgroundColor: [
+                        '#059669',
+                        '#2563eb',
+                        '#dc2626'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.5,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(31, 41, 55, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const percentage = ((context.parsed.y / 152.7) * 100).toFixed(1);
+                                return `${context.label}: $${context.parsed.y}M (${percentage}% of total)`;
+                            },
+                            afterLabel: function() {
+                                return '💡 Click to filter by stock type';
+                            }
+                        }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const stockType = ['non-safety', 'safety', 'writeoff'][index];
+                        
+                        // Visual feedback
+                        const chartContainer = document.getElementById('safetyChart').closest('.chart-container');
+                        chartContainer.classList.add('active');
+                        setTimeout(() => chartContainer.classList.remove('active'), 2000);
+                        
+                        document.getElementById('stockTypeFilter').value = stockType;
+                        applyFilters();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+                scales: { 
+                    y: { 
+                        beginAtZero: true,
+                        max: 90,
+                        grid: {
+                            color: '#f3f4f6'
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return '$' + value + 'M';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6b7280',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 25,
+                        bottom: 10
+                    }
+                }
+            },
+            plugins: [{
+                afterDatasetsDraw: function(chart, args, options) {
+                    const ctx = chart.ctx;
+                    ctx.font = 'bold 13px Inter';
+                    ctx.fillStyle = '#1f2937';
+                    ctx.textAlign = 'center';
+                    
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        meta.data.forEach((bar, index) => {
+                            const data = dataset.data[index];
+                            ctx.fillText('$' + data + 'M', bar.x, bar.y - 8);
+                        });
+                    });
+                }
+            }]
+        });
+        charts.safety = safetyChart;
+
+        // Create Charts function
+        function createCharts() {
+            // Charts already created above
+        }
+
+        // Update Charts with filtered data
+        function updateCharts() {
+            // Update category chart
+            const categoryValues = filteredData.map(item => 
+                item.nonSafety.value + item.safety.value + item.writeoff.value
+            );
+            const categoryLabels = filteredData.map(item => item.category);
+            
+            if (filteredData.length < inventoryData.length) {
+                charts.category.data.labels = categoryLabels;
+                charts.category.data.datasets[0].data = categoryValues;
+            } else {
+                charts.category.data.labels = ['Drilling - Dorra', 'Drilling Operations', 'General Items', 'Chemicals & PPE', 'Spare Parts'];
+                charts.category.data.datasets[0].data = [24.2, 44.9, 3.9, 5.3, 74.4];
+            }
+            charts.category.update();
+
+            // Update safety chart
+            let nonSafetyTotal = 0, safetyTotal = 0, writeoffTotal = 0;
+            filteredData.forEach(item => {
+                nonSafetyTotal += item.nonSafety.value;
+                safetyTotal += item.safety.value;
+                writeoffTotal += item.writeoff.value;
+            });
+            
+            charts.safety.data.datasets[0].data = [
+                parseFloat(nonSafetyTotal.toFixed(1)),
+                parseFloat(safetyTotal.toFixed(1)),
+                parseFloat(writeoffTotal.toFixed(1))
+            ];
+            charts.safety.update();
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', initDashboard);
+
+        // Add smooth scroll animation for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add entrance animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Apply animation to cards
+        document.querySelectorAll('.metric-card, .chart-container, .category-progress').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Animate progress bars on scroll
+        const progressObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const progressBar = entry.target.querySelector('.progress-bar-premium');
+                    if (progressBar) {
+                        const width = progressBar.style.width;
+                        progressBar.style.width = '0%';
+                        setTimeout(() => {
+                            progressBar.style.width = width;
+                        }, 200);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.category-progress').forEach(el => {
+            progressObserver.observe(el);
+        });
+
+        // Auto-apply filters on change
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+        document.getElementById('stockTypeFilter').addEventListener('change', applyFilters);
+        document.getElementById('mroFilter').addEventListener('change', applyFilters);
+        document.getElementById('minValue').addEventListener('input', applyFilters);
+        document.getElementById('maxValue').addEventListener('input', applyFilters);
+        document.getElementById('minItems').addEventListener('input', applyFilters);
+
+        // Show active filters container when filters are active
+        function toggleActiveFiltersDisplay() {
+            const container = document.getElementById('activeFiltersContainer');
+            const activeFiltersDiv = document.getElementById('activeFilters');
+            if (activeFiltersDiv && activeFiltersDiv.children.length > 0) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Enhance applyFilters to toggle display
+        const originalApplyFilters = applyFilters;
+        applyFilters = function() {
+            originalApplyFilters();
+            toggleActiveFiltersDisplay();
+        };
+    </script>
+</body>
+</html>

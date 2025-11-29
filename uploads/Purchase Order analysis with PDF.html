@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>PO Analysis Dashboard (FY 2024–2025)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 20px;
+      padding: 40px 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      border: 1px solid rgba(255,255,255,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #003366, #1f77b4, #ff7f0e, #2ca02c);
+    }
+    .logo-container {
+      margin: 0 auto 30px auto;
+      max-width: 100%;
+      text-align: center;
+      display: block;
+    }
+    header img {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      margin: 0 auto;
+      display: block;
+    }
+    h1 {
+      color: #003366;
+      margin: 10px 0;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .export-btn {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      background: #003366;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 22px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: background 0.2s;
+      z-index: 10;
+    }
+    .export-btn:hover {
+      background: #1f77b4;
+    }
+
+    footer {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-top: 60px;
+      padding: 20px 0 0 0;
+      border-top: 1px solid #e0e0e0;
+      background: none;
+      font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .kpi-box {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .kpi {
+      background: linear-gradient(145deg, #ffffff, #f0f0f0);
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      padding: 25px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.2);
+      position: relative;
+    }
+    .kpi.total-overview {
+      background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+      border-left: 4px solid #1f77b4;
+    }
+    .kpi.normal-type {
+      background: linear-gradient(145deg, #e8f5e8, #c8e6c9);
+      border-left: 4px solid #4caf50;
+    }
+    .kpi.supply-contract {
+      background: linear-gradient(145deg, #fff3e0, #ffe0b2);
+      border-left: 4px solid #ff9800;
+    }
+    .kpi.sole-source {
+      background: linear-gradient(145deg, #fce4ec, #f8bbd9);
+      border-left: 4px solid #e91e63;
+    }
+    .kpi.high-value-dept {
+      background: linear-gradient(145deg, #e8f5e8, #c8e6c9);
+      border-left: 4px solid #4caf50;
+    }
+    .kpi.medium-value-dept {
+      background: linear-gradient(145deg, #fff3e0, #ffe0b2);
+      border-left: 4px solid #ff9800;
+    }
+    .kpi.low-value-dept {
+      background: linear-gradient(145deg, #fce4ec, #f8bbd9);
+      border-left: 4px solid #e91e63;
+    }
+    .kpi:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+    }
+    .kpi h3 {
+      color: #003366;
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .kpi p {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1f77b4;
+      margin: 10px 0;
+    }
+    canvas {
+      margin: 30px auto;
+      display: block;
+      max-width: 600px;
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    #poTypeChart {
+      max-width: 800px;
+      height: 500px;
+    }
+    .chart-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin: 30px auto;
+      max-width: 1400px;
+      align-items: start;
+    }
+    .chart-box {
+      background: white;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    .chart-box canvas {
+      margin: 0;
+      max-width: 100%;
+      height: 400px;
+    }
+    @media (max-width: 1200px) {
+      .chart-container {
+        grid-template-columns: 1fr;
+        max-width: 800px;
+      }
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 30px;
+      background: #fff;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    th {
+      background: linear-gradient(145deg, #003366, #004080);
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+    .insights-box {
+      background: linear-gradient(145deg, #f3e5f5, #e1bee7);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 30px auto;
+      max-width: 800px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border-left: 4px solid #9c27b0;
+    }
+    .insights-box h3 {
+      color: #6a1b9a;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .insights-box ul {
+      color: #4a148c;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+  <style>
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      header, .kpi-box, .chart-container, .insights-box, table, .export-btn {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .export-btn {
+        display: none !important;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      .kpi-box, .insights-box, .chart-container, table {
+        margin-bottom: 24px !important;
+      }
+      table, th, td {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      /* Ensure the first two charts are grouped and centered on the first page */
+      .print-firstpage {
+        page-break-before: always !important;
+        page-break-after: avoid !important;
+        break-before: always !important;
+        break-after: avoid !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto 32px auto !important;
+      }
+      .print-firstpage .chart-box {
+        width: 100% !important;
+        max-width: 700px !important;
+        min-width: 350px !important;
+        margin: 0 auto 24px auto !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .print-firstpage .chart-box canvas {
+        width: 100% !important;
+        height: 350px !important;
+        max-width: 700px !important;
+        min-width: 350px !important;
+        background: #fff !important;
+        display: block !important;
+        margin: 0 auto !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      /* Hide all other content on the first page */
+      /* Remove hiding of content on first page for print */
+      .print-hide-on-firstpage {
+        display: block !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 18mm 12mm 18mm 12mm;
+      }
+      /* Ensure all sections, tables, and charts do not break awkwardly across pages */
+      section, .kpi-box, .chart-container, .insights-box, table, .chart-box, .insights-box, .kpi, .logo-container, header, footer {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        page-break-after: auto !important;
+        break-after: auto !important;
+        page-break-before: auto !important;
+        break-before: auto !important;
+      }
+      /* Prevent table rows from breaking across pages */
+      tr, td, th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      /* Add a little more spacing between sections for print clarity */
+      section, .kpi-box, .chart-container, .insights-box, table {
+        margin-bottom: 18px !important;
+      }
+      /* Ensure charts and tables scale to fit A4 width */
+      .chart-box, .chart-box canvas, table {
+        max-width: 100% !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      /* Remove box-shadows and border-radius for print simplicity */
+      .chart-box, .insights-box, table, header {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+      /* --- ALLOW KPI TILE BACKGROUNDS FOR PRINT --- */
+      .kpi.total-overview {
+        background: linear-gradient(145deg, #e3f2fd, #bbdefb) !important;
+        border-left: 4px solid #1f77b4 !important;
+      }
+      .kpi.normal-type {
+        background: linear-gradient(145deg, #e8f5e8, #c8e6c9) !important;
+        border-left: 4px solid #4caf50 !important;
+      }
+      .kpi.supply-contract {
+        background: linear-gradient(145deg, #fff3e0, #ffe0b2) !important;
+        border-left: 4px solid #ff9800 !important;
+      }
+      .kpi.sole-source {
+        background: linear-gradient(145deg, #fce4ec, #f8bbd9) !important;
+        border-left: 4px solid #e91e63 !important;
+      }
+      .kpi.high-value-dept {
+        background: linear-gradient(145deg, #e8f5e8, #c8e6c9) !important;
+        border-left: 4px solid #4caf50 !important;
+      }
+      .kpi.medium-value-dept {
+        background: linear-gradient(145deg, #fff3e0, #ffe0b2) !important;
+        border-left: 4px solid #ff9800 !important;
+      }
+      .kpi.low-value-dept {
+        background: linear-gradient(145deg, #fce4ec, #f8bbd9) !important;
+        border-left: 4px solid #e91e63 !important;
+      }
+      /* Remove background gradients for print except KPI tiles */
+      body, header, .kpi-box, .insights-box, .chart-box, table, th {
+        background: #fff !important;
+        background-image: none !important;
+      }
+      /* Ensure all text is black for print */
+      body, header, h1, h2, h3, h4, h5, h6, th, td, .insights-box, .kpi, .kpi-box {
+        color: #000 !important;
+      }
+      /* Remove colored borders for print */
+      .kpi, .kpi.total-overview, .kpi.normal-type, .kpi.supply-contract, .kpi.sole-source, .kpi.high-value-dept, .kpi.medium-value-dept, .kpi.low-value-dept, .insights-box {
+        border-left: none !important;
+        border: 1px solid #ccc !important;
+      }
+      /* Remove header gradient bar for print */
+      header::before {
+        display: none !important;
+      }
+      /* Ensure logo prints at a reasonable size */
+      .logo-container img {
+        max-width: 300px !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 0 auto 12px auto !important;
+        display: block !important;
+      }
+      /* Avoid page break right after header */
+      header {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      /* Avoid page break right before footer */
+      footer {
+        page-break-before: avoid !important;
+        break-before: avoid !important;
+      }
+      /* Ensure minimum font size for print readability */
+      body, th, td, h1, h2, h3, h4, h5, h6 {
+        font-size: 12pt !important;
+      }
+      /* Remove padding for print to maximize content area */
+      body {
+        padding: 0 !important;
+      }
+      /* Remove margin from chart containers for print */
+      .chart-container {
+        margin: 0 auto 12px auto !important;
+      }
+      /* Remove margin from tables for print */
+      table {
+        margin: 12px auto !important;
+      }
+      /* Remove hover effects for print */
+      tr:hover {
+        background: #fff !important;
+      }
+      /* Remove colored backgrounds from table rows for print */
+      tr, td, th {
+        background: #fff !important;
+      }
+      /* Remove colored text for print */
+      em, strong, span, small {
+        color: #000 !important;
+      }
+    }
+  </style>
+<body>
+
+  <!-- PRINT OPTIMIZATION: Ensure all sections print cleanly and fit to page -->
+  <style>
+    @media print {
+      /* Remove firstpage logic for all but first two charts, and optimize all sections */
+      .print-hide-on-firstpage {
+        display: block !important;
+      }
+      .kpi-box, .insights-box, .chart-container, table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        margin-bottom: 24px !important;
+        width: 100% !important;
+        max-width: 900px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      .chart-container {
+        display: block !important;
+      }
+      .chart-box {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        width: 100% !important;
+        max-width: 700px !important;
+        min-width: 350px !important;
+        margin: 0 auto 24px auto !important;
+        box-sizing: border-box !important;
+      }
+      .chart-box canvas {
+        width: 100% !important;
+        height: 350px !important;
+        max-width: 700px !important;
+        min-width: 350px !important;
+        background: #fff !important;
+        display: block !important;
+        margin: 0 auto !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .insights-box {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        max-width: 800px !important;
+      }
+      table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        max-width: 900px !important;
+      }
+      thead { display: table-header-group !important; }
+      tfoot { display: table-footer-group !important; }
+      tr, td, th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      /* Avoid breaking after headings */
+      h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      /* Add page break before each major section except the first */
+      .print-section {
+        page-break-before: always !important;
+        break-before: always !important;
+      }
+      /* Remove forced stacking of first two charts for all pages */
+      .print-firstpage {
+        page-break-before: auto !important;
+        page-break-after: auto !important;
+        break-before: auto !important;
+        break-after: auto !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto 32px auto !important;
+      }
+    }
+  </style>
+
+  <header>
+    <div class="logo-container">
+      <img src="KJO.png" alt="KJO Logo" />
+    </div>
+    <button class="export-btn" onclick="window.print()" title="Export or Print Dashboard">Export / Print</button>
+    <h1 style="text-align:center;">Purchase Orders Analysis Dashboard (July 2024 - June 2025)</h1>
+    <h2 style="color: #666; font-size: 18px; margin-top: 5px; text-align:center;">Purchase Orders Issued less than 1 Million USD</h2>
+  </header>
+
+
+  <section class="kpi-box">
+    <div class="kpi total-overview">
+      <h3>Total POs Overview</h3>
+      <p>480</p>
+      <small style="color: #666;">Total POs &lt; 1M USD</small>
+    </div>
+    <div class="kpi total-overview">
+      <h3>Total Value (USD)</h3>
+      <p>$38.34M</p>
+      <small style="color: #666;">Combined Value</small>
+    </div>
+    <div class="kpi normal-type">
+      <h3>Normal POs</h3>
+      <p>342</p>
+      <small style="color: #666;">$24.25M (71.3%)</small>
+    </div>
+    <div class="kpi supply-contract">
+      <h3>Supply Contract</h3>
+      <p>127</p>
+      <small style="color: #666;">$13.06M (26.5%)</small>
+    </div>
+    <div class="kpi sole-source">
+      <h3>Sole Source</h3>
+      <p>11</p>
+      <small style="color: #666;">$1.03M (2.3%)</small>
+    </div>
+  </section>
+
+  <!-- Executive Summary Charts Section -->
+  <h2 style="text-align: center; color: #003366; margin-top: 50px; margin-bottom: 30px;">📈 Executive Summary Analytics</h2>
+  
+  <div class="chart-container print-firstpage">
+    <div class="chart-box">
+      <canvas id="poTypeChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <canvas id="executiveSummaryChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insights-box print-hide-on-firstpage">
+    <h3>📊 Executive Summary: Key Insights</h3>
+    <ul>
+      <li><strong>Procurement Scale:</strong> 480 POs issued under $1M, totaling $38.34M, demonstrates significant procurement activity at the sub-million level. <br> <em>(See: Executive Summary chart, Total POs & Value)</em></li>
+      <li><strong>Normal POs Dominate:</strong> Normal POs account for 71.3% of transactions and value, indicating that routine procurement is the primary driver of spend. <br> <em>(See: PO Type Distribution chart)</em></li>
+      <li><strong>Contracting Mix:</strong> Supply Contracts (26.5%) and Sole Source (2.3%) POs together make up nearly 29% of spend, highlighting the importance of strategic and non-competitive procurement channels. <br> <em>(See: PO Type Distribution chart)</em></li>
+      <li><strong>Spend Distribution:</strong> The majority of procurement value is concentrated in a few PO types and departments, suggesting opportunities for further standardization or risk mitigation. <br> <em>(See: Executive Summary & Department charts)</em></li>
+      <li><strong>Optimization Opportunity:</strong> The relatively low share of Sole Source POs (2.3%) reflects strong competitive procurement practices, but ongoing monitoring is recommended to ensure compliance and value for money. <br> <em>(See: PO Type Distribution chart)</em></li>
+    </ul>
+  </div>
+
+  <!-- Department Analytics Section -->
+  <h2 class="print-hide-on-firstpage" style="text-align: center; color: #003366; margin-top: 50px; margin-bottom: 30px;">📊 Department Performance Analytics</h2>
+  
+  <section class="kpi-box print-hide-on-firstpage">
+    <div class="kpi high-value-dept">
+      <h3>High-Value Departments</h3>
+      <p>5 Depts</p>
+      <small style="color: #666;">OND, OFD, MSS, EDD, CBD<br>$33.52M (87.4%)</small>
+    </div>
+    <div class="kpi medium-value-dept">
+      <h3>Medium-Value Departments</h3>
+      <p>5 Depts</p>
+      <small style="color: #666;">ISD, ITD, ELD, TMD, MSD<br>$4.40M (11.5%)</small>
+    </div>
+    <div class="kpi low-value-dept">
+      <h3>Low-Value Departments</h3>
+      <p>3 Depts</p>
+      <small style="color: #666;">MTD, PGD, ESD<br>$0.42M (1.1%)</small>
+    </div>
+    <div class="kpi total-overview">
+      <h3>Top Department</h3>
+      <p>OND</p>
+      <small style="color: #666;">164 POs - $16.15M<br>Avg: $98,476/PO</small>
+    </div>
+    <div class="kpi total-overview">
+      <h3>Most Efficient</h3>
+      <p>EDD</p>
+      <small style="color: #666;">14 POs - $4.29M<br>Avg: $306,206/PO</small>
+    </div>
+  </section>
+
+  <div class="chart-container print-hide-on-firstpage">
+    <div class="chart-box">
+      <canvas id="summaryMetricsChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <canvas id="departmentChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Department Share of Total POs vs. Share of Total Value (Scatter Plot) -->
+  <div class="chart-container print-hide-on-firstpage">
+    <div class="chart-box" style="grid-column: span 2;">
+      <canvas id="departmentLineChart"></canvas>
+    </div>
+  </div>
+  <div class="insights-box print-hide-on-firstpage">
+    <h3>🎯 Key Management Insights</h3>
+    <ul>
+      <li><strong>Top Department by Value & Volume:</strong> <span style="color:#1f77b4;">OND</span> leads with 164 POs totaling $16.15M (42.1% of total spend), making it the most critical department for procurement strategy.<br> <em>(See: Table 'Total Value', 'No. of POs', charts)</em></li>
+      <li><strong>Efficiency Leader:</strong> <span style="color:#2ca02c;">EDD</span> has the highest average PO value ($306,206), indicating large, high-value orders with fewer transactions. <br> <em>(See: Table 'Avg PO Value')</em></li>
+      <li><strong>Spend Concentration:</strong> The top 5 departments (OND, OFD, MSS, EDD, CBD) account for 87.4% of total procurement value and 81.3% of POs, highlighting a focused spend pattern. <br> <em>(See: Table '% of Total', summary chart)</em></li>
+      <li><strong>Distribution Patterns:</strong> The bar and scatter charts show a steep drop after the top 5, with medium- and low-value departments contributing less to overall spend and volume. <br> <em>(See: Department Distribution charts)</em></li>
+      <li><strong>Diversity & Risk:</strong> 13 departments participate in procurement, with no single department exceeding 50% of spend or volume, indicating balanced risk and moderate diversity. <br> <em>(See: Table 'Department', '% of Total')</em></li>
+    <li><strong>Diversity & Risk:</strong> 13 departments participate in procurement, but spend and volume are concentrated in a few. This creates potential risk if key departments face disruptions. Management should consider developing alternative procurement channels or empowering lower-volume departments to reduce dependency and enhance resilience. <br> <em>(See: Table 'Department', '% of Total')</em></li>
+      <li><strong>Optimization Opportunity:</strong> Medium-value departments (ISD, ITD, ELD, TMD, MSD) represent 11.5% of spend—potential for process improvement or consolidation. <br> <em>(See: Table 'Category', summary chart)</em></li>
+    </ul>
+  </div>
+
+  <h2 class="print-hide-on-firstpage" style="text-align: center; color: #003366; margin-top: 40px;">Department Performance Table</h2>
+  <table class="print-hide-on-firstpage" style="max-width: 900px; margin: 20px auto;">
+    <thead>
+      <tr><th>Department</th><th>No. of POs</th><th>Total Value (USD)</th><th>Avg PO Value</th><th>% of Total</th><th>Category</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background-color: #e8f5e8;"><td>OND</td><td>164</td><td>$16,150,203</td><td>$98,476</td><td>42.1%</td><td>High-Value</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>OFD</td><td>62</td><td>$5,044,320</td><td>$81,360</td><td>13.2%</td><td>High-Value</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>MSS</td><td>42</td><td>$4,302,325</td><td>$102,436</td><td>11.2%</td><td>High-Value</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>EDD</td><td>14</td><td>$4,286,889</td><td>$306,206</td><td>11.2%</td><td>High-Value</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>CBD</td><td>108</td><td>$3,735,981</td><td>$34,592</td><td>9.7%</td><td>High-Value</td></tr>
+      <tr style="background-color: #fff3e0;"><td>ISD</td><td>34</td><td>$1,683,656</td><td>$49,519</td><td>4.4%</td><td>Medium-Value</td></tr>
+      <tr style="background-color: #fff3e0;"><td>ITD</td><td>5</td><td>$790,674</td><td>$158,135</td><td>2.1%</td><td>Medium-Value</td></tr>
+      <tr style="background-color: #fff3e0;"><td>ELD</td><td>13</td><td>$660,597</td><td>$50,815</td><td>1.7%</td><td>Medium-Value</td></tr>
+      <tr style="background-color: #fff3e0;"><td>TMD</td><td>15</td><td>$655,562</td><td>$43,704</td><td>1.7%</td><td>Medium-Value</td></tr>
+      <tr style="background-color: #fff3e0;"><td>MSD</td><td>6</td><td>$605,492</td><td>$100,915</td><td>1.6%</td><td>Medium-Value</td></tr>
+      <tr style="background-color: #fce4ec;"><td>MTD</td><td>11</td><td>$243,266</td><td>$22,115</td><td>0.6%</td><td>Low-Value</td></tr>
+      <tr style="background-color: #fce4ec;"><td>PGD</td><td>5</td><td>$156,935</td><td>$31,387</td><td>0.4%</td><td>Low-Value</td></tr>
+      <tr style="background-color: #fce4ec;"><td>ESD</td><td>1</td><td>$20,610</td><td>$20,610</td><td>0.1%</td><td>Low-Value</td></tr>
+      <tr style="font-weight: bold; background-color: #f0f0f0;"><td>Grand Total</td><td>480</td><td>$38,336,508</td><td>$79,868</td><td>100%</td><td>All Categories</td></tr>
+    </tbody>
+  </table>
+
+
+  <!-- Supplier Analytics Section -->
+  <h2 class="print-hide-on-firstpage" style="text-align: center; color: #003366; margin-top: 60px; margin-bottom: 30px;">🏆 Supplier Performance Analytics</h2>
+
+  <section class="kpi-box print-hide-on-firstpage">
+    <div class="kpi total-overview">
+      <h3>Total Suppliers</h3>
+      <p>15</p>
+      <small style="color: #666;">Suppliers with >5 POs</small>
+    </div>
+    <div class="kpi total-overview">
+      <h3>Total Value (USD)</h3>
+      <p>$10,964,194</p>
+      <small style="color: #666;">Sum for all listed suppliers</small>
+    </div>
+    <div class="kpi normal-type">
+      <h3>Total POs</h3>
+      <p>191</p>
+      <small style="color: #666;">Sum for all listed suppliers</small>
+    </div>
+    <div class="kpi high-value-dept">
+      <h3>Top Supplier by Value</h3>
+      <p>SHAHIG COMPANY</p>
+      <small style="color: #666;">$1,877,783 (32 POs)</small>
+    </div>
+    <div class="kpi high-value-dept">
+      <h3>Top Supplier by Volume</h3>
+      <p>ARGA ARABIA TRADING COMPANY</p>
+      <small style="color: #666;">41 POs ($1,037,164)</small>
+    </div>
+  </section>
+
+  <div class="chart-container print-hide-on-firstpage">
+    <div class="chart-box">
+      <canvas id="supplierValueChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <canvas id="supplierVolumeChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Top 5 Suppliers: Value vs. Volume Trend Line Chart -->
+  <div class="chart-container print-hide-on-firstpage">
+    <div class="chart-box" style="grid-column: span 2;">
+      <canvas id="topSuppliersLineChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insights-box print-hide-on-firstpage">
+    <h3>🔑 Key Supplier Insights</h3>
+    <ul>
+      <li><strong>Top Supplier by Value:</strong> <span style="color:#1f77b4;">SHAHIG COMPANY</span> leads with $1,877,783 (32 POs), accounting for 17.1% of total supplier spend. <br> <em>(See: Table column 'Total Value', 'Rank by Value')</em></li>
+      <li><strong>Top Supplier by Volume:</strong> <span style="color:#ff9800;">ARGA ARABIA TRADING COMPANY</span> issued the most POs (41), but with a lower average PO value ($25,297). <br> <em>(See: Table column 'No. of POs', 'Rank by Volume')</em></li>
+      <li><strong>Spend Concentration:</strong> The top 3 suppliers (SHAHIG COMPANY, ARABIAN KARIM TRADING LLC, ARGA ARABIA TRADING COMPANY) together account for 43.1% of total supplier value and 53.4% of total POs. <br> <em>(See: Table '% of Total Value', charts)</em></li>
+      <li><strong>Efficiency:</strong> <span style="color:#2ca02c;">ADVANCED LOGISITICS TRAD  CONT E</span> has the highest average PO value ($198,389), indicating large, high-value orders despite lower volume. <br> <em>(See: Table 'Avg PO Value', 'Rank by Value')</em></li>
+      <li><strong>Diversity:</strong> 15 suppliers issued 5 or more POs, showing moderate supplier diversity and limited over-reliance on a single vendor. <br> <em>(See: Table 'No. of POs', 'Supplier' column)</em></li>
+      <li><strong>Distribution Patterns:</strong> The bar charts show a steep drop after the top 3 suppliers, with a long tail of smaller suppliers contributing less to total value and volume. <br> <em>(See: Supplier Value and Volume Distribution charts)</em></li>
+    </ul>
+  </div>
+
+  <h2 class="print-hide-on-firstpage" style="text-align: center; color: #003366; margin-top: 40px;">Supplier Performance Table</h2>
+  <table class="print-hide-on-firstpage" style="max-width: 900px; margin: 20px auto;">
+    <thead>
+      <tr><th>Supplier</th><th>No. of POs</th><th>Total Value (USD)</th><th>Avg PO Value</th><th>% of Total</th><th>Category</th><th>Rank by Value</th><th>Rank by Volume</th></tr>
+    </thead>
+    <tbody>
+      <tr style="background-color: #e8f5e8;"><td>SHAHIG COMPANY</td><td>32</td><td>$1,877,783</td><td>$58,681</td><td>17.1%</td><td>High-Value</td><td>1</td><td>2</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>ARABIAN KARIM TRADING LLC</td><td>29</td><td>$1,804,104</td><td>$62,210</td><td>16.5%</td><td>High-Value</td><td>2</td><td>3</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>ARGA ARABIA TRADING COMPANY</td><td>41</td><td>$1,037,164</td><td>$25,297</td><td>9.5%</td><td>High-Value</td><td>3</td><td>1</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>ADVANCED LOGISITICS TRAD  CONT E</td><td>7</td><td>$1,388,720</td><td>$198,389</td><td>12.7%</td><td>High-Value</td><td>4</td><td>9</td></tr>
+      <tr style="background-color: #e8f5e8;"><td>GULF POWER MARINE CO</td><td>13</td><td>$884,684</td><td>$68,052</td><td>8.1%</td><td>High-Value</td><td>5</td><td>4</td></tr>
+      <tr style="background-color: #fff3e0;"><td>HAMED AL-QAHTANI UNIVERSAL MARKETS</td><td>12</td><td>$685,805</td><td>$57,150</td><td>6.3%</td><td>Medium-Value</td><td>6</td><td>5</td></tr>
+      <tr style="background-color: #fff3e0;"><td>FAREDH ARABIAN CONT INDUSTRIAL SERV</td><td>6</td><td>$694,452</td><td>$115,742</td><td>6.3%</td><td>Medium-Value</td><td>7</td><td>13</td></tr>
+      <tr style="background-color: #fff3e0;"><td>YUSUF BIN AHMED KANOO CO LTD</td><td>9</td><td>$651,371</td><td>$72,374</td><td>5.9%</td><td>Medium-Value</td><td>8</td><td>7</td></tr>
+      <tr style="background-color: #fff3e0;"><td>TAJ AL-NOOR TRADING EST</td><td>6</td><td>$425,220</td><td>$70,870</td><td>3.9%</td><td>Medium-Value</td><td>9</td><td>14</td></tr>
+      <tr style="background-color: #fff3e0;"><td>EL HOSS ENGINEERING AND TRANSPORT C</td><td>8</td><td>$330,447</td><td>$41,306</td><td>3.0%</td><td>Medium-Value</td><td>10</td><td>8</td></tr>
+      <tr style="background-color: #fce4ec;"><td>FLOWSERVE ABAHSAIN COMPANY LTD</td><td>6</td><td>$382,519</td><td>$63,753</td><td>3.5%</td><td>Low-Value</td><td>11</td><td>10</td></tr>
+      <tr style="background-color: #fce4ec;"><td>ONLINE SYSTEMS AND COMMUNICATIONS E</td><td>6</td><td>$266,294</td><td>$44,382</td><td>2.4%</td><td>Low-Value</td><td>12</td><td>11</td></tr>
+      <tr style="background-color: #fce4ec;"><td>ELECTRO MECHANICAL  AIR CONDI SER</td><td>10</td><td>$74,903</td><td>$7,490</td><td>0.7%</td><td>Low-Value</td><td>13</td><td>6</td></tr>
+      <tr style="background-color: #fce4ec;"><td>ABDULLAH RASHEED ALRUSHAID TRADING</td><td>5</td><td>$474,326</td><td>$94,865</td><td>4.3%</td><td>Low-Value</td><td>14</td><td>12</td></tr>
+      <tr style="background-color: #fce4ec;"><td>UNITED STAR TRADING EST</td><td>5</td><td>$298,833</td><td>$59,767</td><td>2.7%</td><td>Low-Value</td><td>15</td><td>15</td></tr>
+      <tr style="font-weight: bold; background-color: #f0f0f0;"><td>Grand Total</td><td>191</td><td>$10,964,194</td><td>$57,410</td><td>100%</td><td>All Categories</td><td>-</td><td>-</td></tr>
+    </tbody>
+  </table>
+
+
+
+  <!-- Removed duplicate department performance table -->
+
+  <script>
+    // Supplier Value and Volume Data
+    const supplierData = [
+      { name: 'ARGA ARABIA TRADING COMPANY', pos: 41, value: 1037163.5 },
+      { name: 'SHAHIG COMPANY', pos: 32, value: 1877783.4 },
+      { name: 'ARABIAN KARIM TRADING LLC', pos: 29, value: 1804104 },
+      { name: 'GULF POWER MARINE CO', pos: 13, value: 884683.64 },
+      { name: 'HAMED AL-QAHTANI UNIVERSAL MARKETS', pos: 12, value: 685805 },
+      { name: 'ELECTRO MECHANICAL  AIR CONDI SER', pos: 10, value: 74903 },
+      { name: 'YUSUF BIN AHMED KANOO CO LTD', pos: 9, value: 651370.96 },
+      { name: 'EL HOSS ENGINEERING AND TRANSPORT C', pos: 8, value: 330447.46 },
+      { name: 'ADVANCED LOGISITICS TRAD  CONT E', pos: 7, value: 1388720 },
+      { name: 'FAREDH ARABIAN CONT INDUSTRIAL SERV', pos: 6, value: 694452 },
+      { name: 'TAJ AL-NOOR TRADING EST', pos: 6, value: 425219.67 },
+      { name: 'FLOWSERVE ABAHSAIN COMPANY LTD', pos: 6, value: 382518.57 },
+      { name: 'ONLINE SYSTEMS AND COMMUNICATIONS E', pos: 6, value: 266294 },
+      { name: 'ABDULLAH RASHEED ALRUSHAID TRADING', pos: 5, value: 474326.21 },
+      { name: 'UNITED STAR TRADING EST', pos: 5, value: 298833 }
+    ];
+    // Supplier Value Bar Chart
+    const supplierValueChart = new Chart(document.getElementById('supplierValueChart'), {
+      type: 'bar',
+      data: {
+        labels: supplierData.map(d => d.name),
+        datasets: [{
+          label: 'Total Value (USD)',
+          data: supplierData.map(d => d.value),
+          backgroundColor: supplierData.map((d, i) => i < 3 ? '#4caf50' : '#2196f3'),
+          borderRadius: 5
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Supplier Spending Distribution',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + (value/1000).toFixed(1) + 'K';
+              }
+            }
+          },
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+    // Supplier Volume Bar Chart
+    const supplierVolumeChart = new Chart(document.getElementById('supplierVolumeChart'), {
+      type: 'bar',
+      data: {
+        labels: supplierData.map(d => d.name),
+        datasets: [{
+          label: 'Number of POs',
+          data: supplierData.map(d => d.pos),
+          backgroundColor: supplierData.map((d, i) => i < 3 ? '#ff9800' : '#1f77b4'),
+          borderRadius: 5
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Supplier Volume Distribution',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          },
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    // Top 5 Suppliers: Value vs. Volume Trend Line Chart
+    // All 15 Suppliers: Value vs. Volume Trend Line Chart
+    const allSuppliers = [
+      { name: 'ARGA ARABIA TRADING COMPANY', pos: 41, value: 1037163.5 },
+      { name: 'SHAHIG COMPANY', pos: 32, value: 1877783.4 },
+      { name: 'ARABIAN KARIM TRADING LLC', pos: 29, value: 1804104 },
+      { name: 'GULF POWER MARINE CO', pos: 13, value: 884683.64 },
+      { name: 'HAMED AL-QAHTANI UNIVERSAL MARKETS', pos: 12, value: 685805 },
+      { name: 'ELECTRO MECHANICAL  AIR CONDI SER', pos: 10, value: 74903 },
+      { name: 'YUSUF BIN AHMED KANOO CO LTD', pos: 9, value: 651370.96 },
+      { name: 'EL HOSS ENGINEERING AND TRANSPORT C', pos: 8, value: 330447.46 },
+      { name: 'ADVANCED LOGISITICS TRAD  CONT E', pos: 7, value: 1388720 },
+      { name: 'FAREDH ARABIAN CONT INDUSTRIAL SERV', pos: 6, value: 694452 },
+      { name: 'TAJ AL-NOOR TRADING EST', pos: 6, value: 425219.67 },
+      { name: 'FLOWSERVE ABAHSAIN COMPANY LTD', pos: 6, value: 382518.57 },
+      { name: 'ONLINE SYSTEMS AND COMMUNICATIONS E', pos: 6, value: 266294 },
+      { name: 'ABDULLAH RASHEED ALRUSHAID TRADING', pos: 5, value: 474326.21 },
+      { name: 'UNITED STAR TRADING EST', pos: 5, value: 298833 }
+    ];
+    // Generate 15 distinct colors for lines
+    const lineColors = [
+      '#1f77b4', '#ff9800', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf',
+      '#f44336', '#00bcd4', '#ffeb3b', '#4caf50', '#9c27b0'
+    ];
+    const ctxTopSuppliers = document.getElementById('topSuppliersLineChart').getContext('2d');
+    const topSuppliersLineChart = new Chart(ctxTopSuppliers, {
+      type: 'line',
+      data: {
+        labels: allSuppliers.map(d => d.name),
+        datasets: [
+          {
+            label: 'Total Value (USD)',
+            data: allSuppliers.map(d => d.value),
+            borderColor: lineColors[0],
+            backgroundColor: 'rgba(31,119,180,0.1)',
+            pointBackgroundColor: lineColors[0],
+            pointBorderColor: '#fff',
+            pointRadius: 7,
+            pointHoverRadius: 11,
+            fill: false,
+            tension: 0.4
+          },
+          {
+            label: 'Number of POs',
+            data: allSuppliers.map(d => d.pos),
+            borderColor: lineColors[1],
+            backgroundColor: 'rgba(255,152,0,0.1)',
+            pointBackgroundColor: lineColors[1],
+            pointBorderColor: '#fff',
+            pointRadius: 7,
+            pointHoverRadius: 11,
+            fill: false,
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'All 15 Suppliers: Value vs. Volume Trend',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              font: { size: 14 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                if (context.dataset.label === 'Total Value (USD)') {
+                  return 'Value: $' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                } else {
+                  return 'POs: ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Value (USD) / Number of POs' },
+            grid: { color: '#e0e0e0' }
+          },
+          x: {
+            title: { display: true, text: 'Supplier' },
+            grid: { color: '#f5f5f5' },
+            ticks: { maxRotation: 45, minRotation: 45 }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+    // Department Line Chart: Value and Volume Trend for All Departments
+    const deptData = [
+      { dept: 'OND', pos: 164, value: 16150203 },
+      { dept: 'OFD', pos: 62, value: 5044320 },
+      { dept: 'MSS', pos: 42, value: 4302325 },
+      { dept: 'EDD', pos: 14, value: 4286889 },
+      { dept: 'CBD', pos: 108, value: 3735981 },
+      { dept: 'ISD', pos: 34, value: 1683656 },
+      { dept: 'ITD', pos: 5, value: 790674 },
+      { dept: 'ELD', pos: 13, value: 660597 },
+      { dept: 'TMD', pos: 15, value: 655562 },
+      { dept: 'MSD', pos: 6, value: 605492 },
+      { dept: 'MTD', pos: 11, value: 243266 },
+      { dept: 'PGD', pos: 5, value: 156935 },
+      { dept: 'ESD', pos: 1, value: 20610 }
+    ];
+    const deptLineColors = ['#1f77b4', '#ff9800'];
+    const ctxDepartmentLine = document.getElementById('departmentLineChart').getContext('2d');
+    const departmentLineChart = new Chart(ctxDepartmentLine, {
+      type: 'line',
+      data: {
+        labels: deptData.map(d => d.dept),
+        datasets: [
+          {
+            label: 'Total Value (USD)',
+            data: deptData.map(d => d.value),
+            borderColor: deptLineColors[0],
+            backgroundColor: 'rgba(31,119,180,0.1)',
+            pointBackgroundColor: deptLineColors[0],
+            pointBorderColor: '#fff',
+            pointRadius: 7,
+            pointHoverRadius: 11,
+            fill: false,
+            tension: 0.4
+          },
+          {
+            label: 'Number of POs',
+            data: deptData.map(d => d.pos),
+            borderColor: deptLineColors[1],
+            backgroundColor: 'rgba(255,152,0,0.1)',
+            pointBackgroundColor: deptLineColors[1],
+            pointBorderColor: '#fff',
+            pointRadius: 7,
+            pointHoverRadius: 11,
+            fill: false,
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'All Departments: Value vs. Volume Trend',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              usePointStyle: true,
+              font: { size: 14 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                if (context.dataset.label === 'Total Value (USD)') {
+                  return 'Value: $' + context.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                } else {
+                  return 'POs: ' + context.formattedValue;
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Value (USD) / Number of POs' },
+            grid: { color: '#e0e0e0' }
+          },
+          x: {
+            title: { display: true, text: 'Department' },
+            grid: { color: '#f5f5f5' },
+            ticks: { maxRotation: 45, minRotation: 45 }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+    const poTypeChart = new Chart(document.getElementById('poTypeChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ["Normal", "Supply Contract", "Sole Source"],
+        datasets: [{
+          data: [24245910.72, 13059493.45, 1031103.43],
+          backgroundColor: ['#1f77b4', '#ff7f0e', '#2ca02c'],
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'PO Type Distribution by Value (POs < 1M USD)',
+            font: {
+              size: 16,
+              weight: 'bold'
+            },
+            color: '#003366'
+          },
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    // Executive Summary - Key Metrics Overview Chart
+    const executiveSummaryChart = new Chart(document.getElementById('executiveSummaryChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Total POs', 'Total Value ($M)', 'Normal POs', 'Supply Contract', 'Sole Source'],
+        datasets: [{
+          label: 'Summary Metrics',
+          data: [480, 38.34, 342, 127, 11],
+          backgroundColor: [
+            '#1f77b4',  // Total POs - blue
+            '#2ca02c',  // Total Value - green  
+            '#4caf50',  // Normal POs - light green
+            '#ff9800',  // Supply Contract - orange
+            '#e91e63'   // Sole Source - pink
+          ],
+          borderRadius: 8,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Procurement Summary Overview (July 2024 - June 2025)',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const labels = [
+                  '480 Total Purchase Orders',
+                  '$38.34M Total Procurement Value',
+                  '342 Normal POs (71.3%)',
+                  '127 Supply Contracts (26.5%)',
+                  '11 Sole Source POs (2.3%)'
+                ];
+                return labels[context.dataIndex];
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Count / Value'
+            },
+            ticks: {
+              callback: function(value, index) {
+                // Different formatting for different metrics
+                if (index === 1) return '$' + value + 'M';
+                return value;
+              }
+            }
+          },
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    // Top 5 vs Bottom 8 Departments Analysis Chart
+    const summaryMetricsChart = new Chart(document.getElementById('summaryMetricsChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Top 5 Departments', 'Bottom 8 Departments'],
+        datasets: [
+          {
+            label: 'Total Value (Million USD)',
+            data: [33.52, 4.82],
+            backgroundColor: ['#4caf50', '#ff9800'],
+            borderRadius: 8,
+            yAxisID: 'y'
+          },
+          {
+            label: 'Number of POs',
+            data: [390, 90],
+            backgroundColor: ['#2196f3', '#f44336'],
+            borderRadius: 8,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Top 5 vs Bottom 8 Departments - Value & Volume Analysis',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                if (context.datasetIndex === 0) {
+                  const percentage = context.dataIndex === 0 ? '87.4%' : '12.6%';
+                  return `Value: $${context.raw}M (${percentage})`;
+                } else {
+                  const percentage = context.dataIndex === 0 ? '81.3%' : '18.7%';
+                  return `POs: ${context.raw} (${percentage})`;
+                }
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Value (Million USD)'
+            },
+            beginAtZero: true,
+            max: 40
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            title: {
+              display: true,
+              text: 'Number of POs'
+            },
+            beginAtZero: true,
+            max: 450,
+            grid: {
+              drawOnChartArea: false,
+            },
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+
+    // Department Spending Distribution Chart
+    const departmentChart = new Chart(document.getElementById('departmentChart'), {
+      type: 'bar',
+      data: {
+        labels: ["OND","OFD","MSS","EDD","CBD","ISD","ITD","ELD","TMD","MSD","MTD","PGD","ESD"],
+        datasets: [{
+          label: 'Total Value (USD)',
+          data: [16150203,5044320,4302325,4286889,3735981,1683656,790674,660597,655562,605492,243266,156935,20610],
+          backgroundColor: [
+            '#4caf50','#4caf50','#4caf50','#4caf50','#4caf50', // High-value (green)
+            '#ff9800','#ff9800','#ff9800','#ff9800','#ff9800', // Medium-value (orange)
+            '#e91e63','#e91e63','#e91e63' // Low-value (pink)
+          ],
+          borderRadius: 5
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Department Spending Distribution (Color-coded by Category)',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + (value/1000000).toFixed(1) + 'M';
+              }
+            }
+          },
+          x: {
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          }
+        }
+      }
+    });
+
+    // Top 5 Departments - Average PO Value Comparison Chart
+    const departmentEfficiencyChart = new Chart(document.getElementById('departmentEfficiencyChart'), {
+      type: 'bar',
+      data: {
+        labels: ['OND', 'OFD', 'MSS', 'EDD', 'CBD'],
+        datasets: [{
+          label: 'Average PO Value (USD)',
+          data: [98476, 81360, 102436, 306206, 34592],
+          backgroundColor: [
+            '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'
+          ],
+          borderRadius: 8,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Top 5 Departments - Average Purchase Order Value',
+            font: { size: 16, weight: 'bold' },
+            color: '#003366'
+          },
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const deptInfo = [
+                  'OND: 164 POs, $98K avg - High volume leader',
+                  'OFD: 62 POs, $81K avg - Consistent performer', 
+                  'MSS: 42 POs, $102K avg - Above average efficiency',
+                  'EDD: 14 POs, $306K avg - Highest efficiency',
+                  'CBD: 108 POs, $35K avg - High volume, lower value'
+                ];
+                return deptInfo[context.dataIndex];
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'Average PO Value (USD)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '$' + (value/1000).toFixed(0) + 'K';
+              }
+            }
+          },
+          x: {
+            title: {
+              display: true,
+              text: 'Department'
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  </script>
+</body>
+</html>

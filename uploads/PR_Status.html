@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Header Statistics Dashboard with Premium Buyer Summary and Colored Charts</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fb;
+    margin: 0;
+    padding: 20px;
+    color: #2c3e50;
+  }
+  .dashboard-header {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    flex: 1 1 220px;
+    border-radius: 20px;
+    color: white;
+    padding: 30px 30px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.07);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+    user-select: none;
+  }
+  .stat-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+  }
+  .stat-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  }
+  .stat-value {
+    font-size: 3.6rem;
+    font-weight: 900;
+    line-height: 1;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  .stat-total {
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    box-shadow: 0 10px 25px rgba(22, 160, 133,0.4);
+  }
+  .stat-notprocessed {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    box-shadow: 0 10px 25px rgba(192, 57, 43, 0.4);
+  }
+  .stat-rfqpassed {
+    background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+    box-shadow: 0 10px 25px rgba(211, 84, 0, 0.4);
+  }
+  .stat-rfqfuture {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    box-shadow: 0 10px 25px rgba(142, 68, 173, 0.4);
+    color: #f2f2f2;
+  }
+  @media (max-width: 600px) {
+    .dashboard-header {
+      flex-direction: column;
+      align-items: center;
+    }
+    .stat-card {
+      width: 100%;
+      max-width: 420px;
+    }
+  }
+  .chart-container, .buyer-summary {
+    max-width: 900px;
+    margin: 0 auto 50px;
+    background: white;
+    border-radius: 25px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.07);
+    padding: 30px 30px 50px;
+  }
+  h2, h3 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 800;
+    color: #34495e;
+    letter-spacing: 1.1px;
+  }
+  .buyer-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #34495e;
+  }
+  .buyer-table thead tr {
+    background: transparent;
+  }
+  .buyer-table th {
+    text-align: left;
+    padding: 12px 20px;
+    color: #7f8c8d;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    border-bottom: 2px solid #ecf0f1;
+  }
+  .buyer-table tbody tr {
+    border-radius: 15px;
+    box-shadow: inset 3px 3px 6px #cbced1, inset -3px -3px 6px #ffffff;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .buyer-table tbody tr:hover {
+    background: #d1d9e6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(46, 61, 73, 0.15);
+  }
+  .buyer-table td {
+    padding: 15px 20px;
+    border: none;
+    border-radius: 15px;
+  }
+  /* Colored alternating rows using brand palette colors */
+  .buyer-table tbody tr:nth-child(4n+1) {
+    background: #e0f2f1; /* Teal light */
+    color: #004d40;
+    box-shadow: none;
+  }
+  .buyer-table tbody tr:nth-child(4n+2) {
+    background: #f3e5f5; /* Purple light */
+    color: #4a148c;
+    box-shadow: none;
+  }
+  .buyer-table tbody tr:nth-child(4n+3) {
+    background: #fbe9e7; /* Red light */
+    color: #bf360c;
+    box-shadow: none;
+  }
+  .buyer-table tbody tr:nth-child(4n+4) {
+    background: #fffde7; /* Yellow light */
+    color: #f57f17;
+    box-shadow: none;
+  }
+
+  /* Scroll horizontally on small screens */
+  .buyer-summary {
+    overflow-x: auto;
+  }
+  /* Scrollbar styling */
+  .buyer-summary::-webkit-scrollbar {
+    height: 8px;
+  }
+  .buyer-summary::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+    border-radius: 4px;
+  }
+  .buyer-summary::-webkit-scrollbar-track {
+    background: #ecf0f1;
+  }
+</style>
+</head>
+<body>
+  <div class="dashboard-header" role="region" aria-label="Header statistics dashboard">
+    <div class="stat-card stat-total" tabindex="0">
+      <div class="stat-title">Total PR</div>
+      <div class="stat-value" id="total-pr">0</div>
+    </div>
+    <div class="stat-card stat-notprocessed" tabindex="0">
+      <div class="stat-title">Not Processed</div>
+      <div class="stat-value" id="not-processed">0</div>
+    </div>
+    <div class="stat-card stat-rfqpassed" tabindex="0">
+      <div class="stat-title">RFQ Date Passed</div>
+      <div class="stat-value" id="rfq-passed">0</div>
+    </div>
+    <div class="stat-card stat-rfqfuture" tabindex="0">
+      <div class="stat-title">RFQ Date Future</div>
+      <div class="stat-value" id="rfq-future">0</div>
+    </div>
+  </div>
+
+  <div class="chart-container" aria-label="Header statistics overview chart and diagram">
+    <h2>Header Statistics Overview</h2>
+    <canvas id="statsChart" aria-label="Header statistics bar chart" role="img"></canvas>
+  </div>
+
+  <div class="buyer-summary" aria-label="Buyer wise summary">
+    <h3>Buyer-wise Summary</h3>
+    <table class="buyer-table" aria-describedby="buyerSummaryDesc" role="table">
+      <caption id="buyerSummaryDesc" style="text-align:center; margin-bottom: 10px;">Total counts of PRs by buyer</caption>
+      <thead>
+        <tr>
+          <th scope="col">Buyer</th>
+          <th scope="col">Total Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>A/Monim Al-Abbad</td><td>22</td></tr>
+        <tr><td>Ali Husain</td><td>63</td></tr>
+        <tr><td>Jaber N. Al-Hajri</td><td>46</td></tr>
+        <tr><td>Khaled Al-Enzi</td><td>1</td></tr>
+        <tr><td>Mohammed Al-Amer</td><td>31</td></tr>
+        <tr><td>Mohammed Al-Balawi</td><td>45</td></tr>
+        <tr><td>Muhammad B. Ali</td><td>21</td></tr>
+        <tr><td>Musaad Al Shammari</td><td>9</td></tr>
+        <tr><td>Purchase SUPT</td><td>5</td></tr>
+        <tr><td>Torqi Al-Ruwaily</td><td>1</td></tr>
+      </tbody>
+    </table>
+    <h3>Buyer-wise Total Counts Chart</h3>
+    <canvas id="buyerChart" aria-label="Buyer wise colorful line chart" role="img"></canvas>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const stats = {
+    totalPR: 244,
+    notProcessed: 41,
+    rfqDatePassed: 153,
+    rfqDateFuture: 50
+  };
+
+  const buyers = [
+    'A/Monim Al-Abbad',
+    'Ali Husain',
+    'Jaber N. Al-Hajri',
+    'Khaled Al-Enzi',
+    'Mohammed Al-Amer',
+    'Mohammed Al-Balawi',
+    'Muhammad B. Ali',
+    'Musaad Al Shammari',
+    'Purchase SUPT',
+    'Torqi Al-Ruwaily'
+  ];
+  const buyerCounts = [22, 63, 46, 1, 31, 45, 21, 9, 5, 1];
+
+  // Define distinct colors for each buyer point
+  const pointColors = [
+    '#1abc9c', // teal
+    '#3498db', // blue
+    '#9b59b6', // purple
+    '#e74c3c', // red
+    '#f39c12', // orange
+    '#27ae60', // green
+    '#8e44ad', // dark purple
+    '#d35400', // dark orange
+    '#c0392b', // dark red
+    '#2980b9'  // dark blue
+  ];
+
+  // Animate count up function
+  function animateValue(id, start, end, duration) {
+    let range = end - start;
+    if (range === 0) {
+      document.getElementById(id).textContent = end;
+      return;
+    }
+    let current = start;
+    let increment = end > start ? 1 : -1;
+    let stepTime = Math.abs(Math.floor(duration / range));
+    let obj = document.getElementById(id);
+    let timer = setInterval(function() {
+      current += increment;
+      obj.textContent = current;
+      if (current == end) {
+        clearInterval(timer);
+      }
+    }, stepTime);
+  }
+
+  window.onload = () => {
+    animateValue("total-pr", 0, stats.totalPR, 1500);
+    animateValue("not-processed", 0, stats.notProcessed, 1500);
+    animateValue("rfq-passed", 0, stats.rfqDatePassed, 1500);
+    animateValue("rfq-future", 0, stats.rfqDateFuture, 1500);
+
+    // Header stats bar chart (existing style)
+    const ctx = document.getElementById('statsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Not Processed', 'RFQ Date Passed', 'RFQ Date Future', 'Other PRs'],
+        datasets: [{
+          label: 'Count',
+          data: [
+            stats.notProcessed,
+            stats.rfqDatePassed,
+            stats.rfqDateFuture,
+            stats.totalPR - (stats.notProcessed + stats.rfqDatePassed + stats.rfqDateFuture)
+          ],
+          backgroundColor: [
+            'rgba(231, 76, 60, 0.85)',  // Not Processed - red
+            'rgba(241, 196, 15, 0.85)', // RFQ Passed - yellow
+            'rgba(155, 89, 182, 0.85)', // RFQ Future - purple
+            'rgba(26, 188, 156, 0.85)'  // Other PRs - teal
+          ],
+          borderColor: [
+            '#e74c3c',
+            '#f1c40f',
+            '#9b59b6',
+            '#1abc9c'
+          ],
+          borderWidth: 2,
+          borderRadius: 8,
+          maxBarThickness: 60,
+          hoverBackgroundColor: [
+            '#c0392b',
+            '#d4ac0d',
+            '#8e44ad',
+            '#16a085'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 10,
+              color: '#34495e',
+              font: { weight: '700', size: 14 }
+            },
+            grid: {
+              color: '#ecf0f1'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#34495e',
+              font: { weight: '700', size: 14 }
+            },
+            grid: {
+              display: false
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(44, 62, 80, 0.9)',
+            titleFont: { size: 16, weight:'bold' },
+            bodyFont: { size: 14 },
+            callbacks: {
+              label: ctx => `${ctx.label}: ${ctx.parsed.y.toLocaleString()}`
+            }
+          }
+        }
+      }
+    });
+
+    // Buyer-wise line chart with color per point
+    const buyerCtx = document.getElementById('buyerChart').getContext('2d');
+    new Chart(buyerCtx, {
+      type: 'line',
+      data: {
+        labels: buyers,
+        datasets: [{
+          label: 'Total Counts',
+          data: buyerCounts,
+          fill: true,
+          borderColor: '#2980b9',
+          backgroundColor: 'rgba(41, 128, 185, 0.3)',
+          tension: 0.35,
+          borderWidth: 4,
+          pointBackgroundColor: pointColors,
+          pointBorderColor: '#fff',
+          pointRadius: 7,
+          pointHoverRadius: 9,
+          hoverBorderWidth: 3,
+          hoverBackgroundColor: 'rgba(52, 73, 94, 0.4)',
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { stepSize: 10, color: '#34495e', font: { weight: '600', size: 14 } },
+            grid: { color: '#ecf0f1' }
+          },
+          x: {
+            grid: { display: false },
+            ticks: { color: '#34495e', font: { weight: '600', size: 13 } }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { font: { size: 16, weight: '700' }, color: '#34495e' }
+          },
+          tooltip: {
+            mode: 'nearest',
+            intersect: false,
+            backgroundColor: 'rgba(44, 62, 80, 0.9)',
+            titleFont: { size: 16, weight: 'bold' },
+            bodyFont: { size: 14 },
+            callbacks: {
+              label: ctx => `Count: ${ctx.parsed.y.toLocaleString()}`
+            }
+          }
+        }
+      }
+    });
+  };
+</script>
+</body>
+</html>
+

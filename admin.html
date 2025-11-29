@@ -1,0 +1,2667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - PULSE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar h1 {
+            font-size: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .welcome-card h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .admin-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 2px solid #e9ecef;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .admin-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .admin-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .admin-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .admin-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .admin-card li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            color: #666;
+        }
+
+        .admin-card li:last-child {
+            border-bottom: none;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 10px;
+        }
+
+        /* Premium Stat Cards */
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #e9ecef;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            border-color: transparent;
+        }
+
+        .stat-card.blue::before {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .stat-card.blue:hover {
+            box-shadow: 0 12px 24px rgba(102, 126, 234, 0.25);
+        }
+
+        .stat-card.blue .stat-number {
+            color: #667eea;
+        }
+
+        .stat-card.green::before {
+            background: linear-gradient(90deg, #28a745, #20c997);
+        }
+
+        .stat-card.green:hover {
+            box-shadow: 0 12px 24px rgba(40, 167, 69, 0.25);
+        }
+
+        .stat-card.green .stat-number {
+            color: #28a745;
+        }
+
+        .stat-card.orange::before {
+            background: linear-gradient(90deg, #ff9800, #ffc107);
+        }
+
+        .stat-card.orange:hover {
+            box-shadow: 0 12px 24px rgba(255, 152, 0, 0.25);
+        }
+
+        .stat-card.orange .stat-number {
+            color: #ff9800;
+        }
+
+        .stat-card.purple::before {
+            background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+        }
+
+        .stat-card.purple:hover {
+            box-shadow: 0 12px 24px rgba(156, 39, 176, 0.25);
+        }
+
+        .stat-card.purple .stat-number {
+            color: #9c27b0;
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <svg width="35" height="35" viewBox="0 0 100 100">
+                <defs>
+                    <linearGradient id="adminLogoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+                        <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="42" fill="none" stroke="white" stroke-width="1.5" opacity="0.3"/>
+                <path d="M 12,50 Q 18,35 24,50 T 36,50 Q 42,65 48,50" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+                <path d="M 30,50 Q 36,26 42,50 T 54,50 Q 60,20 66,50 T 78,50" fill="none" stroke="url(#adminLogoGradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M 52,50 Q 58,65 64,50 T 76,50 Q 82,35 88,50" fill="none" stroke="#f093fb" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+                <circle cx="50" cy="50" r="7" fill="white"/>
+                <circle cx="50" cy="50" r="4" fill="#764ba2"/>
+                <circle cx="50" cy="15" r="3.5" fill="white" opacity="0.9"/>
+                <circle cx="85" cy="50" r="3.5" fill="white" opacity="0.9"/>
+                <circle cx="50" cy="85" r="3.5" fill="#f093fb" opacity="0.9"/>
+                <circle cx="15" cy="50" r="3.5" fill="white" opacity="0.9"/>
+            </svg>
+            <h1>PULSE Admin Panel</h1>
+        </div>
+        <div class="user-info">
+            <span class="admin-badge">PRINCIPAL</span>
+            <span id="userName">Administrator</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-card">
+            <h2>Welcome, Principal!</h2>
+            <p>You have full system access. Manage users, licenses, and access rights across the entire PULSE platform.</p>
+        </div>
+
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+            <div class="stat-card blue">
+                <h3><span class="stat-icon">👥</span> Total Users</h3>
+                <div class="stat-number">7</div>
+                <div style="font-size: 12px; color: #999; margin-top: 8px;">All platform users</div>
+            </div>
+            <div class="stat-card green">
+                <h3><span class="stat-icon">✅</span> Active Licenses</h3>
+                <div class="stat-number">7</div>
+                <div style="font-size: 12px; color: #999; margin-top: 8px;">Currently in use</div>
+            </div>
+            <div class="stat-card orange">
+                <h3><span class="stat-icon">🔄</span> Active Sessions</h3>
+                <div class="stat-number">1</div>
+                <div style="font-size: 12px; color: #999; margin-top: 8px;">Live connections</div>
+            </div>
+            <div class="stat-card purple">
+                <h3><span class="stat-icon">⚡</span> System Uptime</h3>
+                <div class="stat-number">99.9%</div>
+                <div style="font-size: 12px; color: #999; margin-top: 8px;">Last 30 days</div>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <div class="admin-card" style="transition: transform 0.3s;">
+                <h3 style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 32px;">👥</span>User Management</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 15px 0;">Create, edit, and delete user accounts. Manage user roles and permissions across the platform.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>Current Users:</strong></p>
+                    <ul style="list-style: none; padding: 0; font-size: 13px; color: #666;">
+                        <li style="padding: 5px 0;">• admin - Principal</li>
+                        <li style="padding: 5px 0;">• kjo2 - Master</li>
+                        <li style="padding: 5px 0;">• SCD_CIS - Business User</li>
+                        <li style="padding: 5px 0;">• SCD_PUR - Business User</li>
+                        <li style="padding: 5px 0;">• SCD_WHS - Business User</li>
+                        <li style="padding: 5px 0;">• SCD_SRM - Business User</li>
+                        <li style="padding: 5px 0;">• SCD_MGR - Business User</li>
+                    </ul>
+                </div>
+                <button style="margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''" onclick="openUserModal()">Manage Users</button>
+            </div>
+
+            <div class="admin-card" style="transition: transform 0.3s;">
+                <h3 style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 32px;">🔑</span>License Management</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 15px 0;">Allocate and track licenses. Monitor usage and manage subscription plans.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>License Details:</strong></p>
+                    <ul style="list-style: none; padding: 0; font-size: 13px; color: #666;">
+                        <li style="padding: 5px 0;">• Total Licenses: 7</li>
+                        <li style="padding: 5px 0;">• Used: 7</li>
+                        <li style="padding: 5px 0;">• Available: 0</li>
+                        <li style="padding: 5px 0;">• Expires: Dec 31, 2025</li>
+                    </ul>
+                </div>
+                <button style="margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''" onclick="openLicenseModal()">Manage Licenses</button>
+            </div>
+
+            <div class="admin-card" style="transition: transform 0.3s;">
+                <h3 style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 32px;">🔒</span>Access Rights</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 15px 0;">Configure role-based permissions. Control who can access specific dashboards and features.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>Access Levels:</strong></p>
+                    <ul style="list-style: none; padding: 0; font-size: 13px; color: #666;">
+                        <li style="padding: 5px 0;">• Principal: Full Access</li>
+                        <li style="padding: 5px 0;">• Master: Upload & Manage</li>
+                        <li style="padding: 5px 0;">• Business User: View Only</li>
+                    </ul>
+                </div>
+                <button style="margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''" onclick="openAccessModal()">Configure Access</button>
+            </div>
+
+            <div class="admin-card" style="transition: transform 0.3s;">
+                <h3 style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 32px;">⚙️</span>System Settings</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 15px 0;">Configure system-wide settings, security policies, and platform preferences.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>Settings:</strong></p>
+                    <ul style="list-style: none; padding: 0; font-size: 13px; color: #666;">
+                        <li style="padding: 5px 0;">• SSO: Enabled</li>
+                        <li style="padding: 5px 0;">• MFA: Required</li>
+                        <li style="padding: 5px 0;">• Session Timeout: 30 min</li>
+                        <li style="padding: 5px 0;">• Audit Logs: Active</li>
+                    </ul>
+                </div>
+                <button style="margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''" onclick="openSettingsModal()">System Settings</button>
+            </div>
+
+            <div class="admin-card" style="transition: transform 0.3s;">
+                <h3 style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 32px;">📝</span>Activity Logs</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 15px 0;">View comprehensive audit trails. Monitor all user activities and system events.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>Recent Activity:</strong></p>
+                    <ul style="list-style: none; padding: 0; font-size: 13px; color: #666;">
+                        <li style="padding: 5px 0;">• admin logged in - Now</li>
+                        <li style="padding: 5px 0;">• kjo2 uploaded data - 2h ago</li>
+                        <li style="padding: 5px 0;">• SCD_CIS viewed dashboard - 3h ago</li>
+                    </ul>
+                </div>
+                <button style="margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''" onclick="openLogsModal()">View All Logs</button>
+            </div>
+
+            <div class="admin-card" style="transition: transform 0.3s;">
+                <h3 style="display: flex; align-items: center; gap: 10px;"><span style="font-size: 32px;">📊</span>Platform Analytics</h3>
+                <p style="color: #666; font-size: 14px; line-height: 1.6; margin: 15px 0;">Track platform usage, performance metrics, and user engagement statistics.</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="font-size: 13px; color: #555; margin-bottom: 8px;"><strong>Usage Stats:</strong></p>
+                    <ul style="list-style: none; padding: 0; font-size: 13px; color: #666;">
+                        <li style="padding: 5px 0;">• Total Logins Today: 3</li>
+                        <li style="padding: 5px 0;">• Dashboards Viewed: 15</li>
+                        <li style="padding: 5px 0;">• Data Uploads: 2</li>
+                        <li style="padding: 5px 0;">• Avg Session: 25 min</li>
+                    </ul>
+                </div>
+                <button style="margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow=''" onclick="openAnalyticsModal()">View Analytics</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Analytics Modal -->
+    <div id="analyticsModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <div>
+                    <h2 style="margin: 0 0 8px 0;">📊 Platform Analytics</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.95;">Track platform usage, performance metrics, and user engagement</p>
+                </div>
+                <span class="close" onclick="closeAnalyticsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+
+            <!-- Time Period Selector -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px; gap: 10px;">
+                <button onclick="setAnalyticsPeriod('today')" id="btnToday" style="padding: 8px 16px; background: white; border: 2px solid #667eea; color: #667eea; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Today</button>
+                <button onclick="setAnalyticsPeriod('7days')" id="btn7days" style="padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Last 7 Days</button>
+                <button onclick="setAnalyticsPeriod('30days')" id="btn30days" style="padding: 8px 16px; background: white; border: 2px solid #667eea; color: #667eea; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Last 30 Days</button>
+                <button onclick="setAnalyticsPeriod('90days')" id="btn90days" style="padding: 8px 16px; background: white; border: 2px solid #667eea; color: #667eea; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Last 90 Days</button>
+            </div>
+
+            <!-- Overview Dashboard Cards -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;">7</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Total Users</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;" id="totalLoginsMonth">127</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Total Logins This Month</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;">28 min</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Avg Session Duration</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;">99.8%</div>
+                    <div style="font-size: 13px; opacity: 0.9;">System Uptime</div>
+                </div>
+            </div>
+
+            <!-- Usage Metrics & License Utilization -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                
+                <!-- Usage Metrics -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">📈</span> Usage Metrics
+                    </h3>
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #666;">Monday</span>
+                            <span style="font-size: 13px; color: #333; font-weight: 600;">18 logins</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #667eea, #764ba2); width: 72%; height: 100%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #666;">Tuesday</span>
+                            <span style="font-size: 13px; color: #333; font-weight: 600;">25 logins</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #667eea, #764ba2); width: 100%; height: 100%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #666;">Wednesday</span>
+                            <span style="font-size: 13px; color: #333; font-weight: 600;">22 logins</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #667eea, #764ba2); width: 88%; height: 100%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #666;">Thursday</span>
+                            <span style="font-size: 13px; color: #333; font-weight: 600;">20 logins</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #667eea, #764ba2); width: 80%; height: 100%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-size: 13px; color: #666;">Friday</span>
+                            <span style="font-size: 13px; color: #333; font-weight: 600;">19 logins</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #667eea, #764ba2); width: 76%; height: 100%;"></div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 6px;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #333;">Peak Usage Hours</div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                            <div>🕑 9:00 AM - 11:00 AM: <strong style="color: #333;">38% of activity</strong></div>
+                            <div>🕔 2:00 PM - 4:00 PM: <strong style="color: #333;">28% of activity</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- License Utilization -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">🎫</span> License Utilization
+                    </h3>
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 14px; color: #333; font-weight: 600;">Principal Licenses</span>
+                            <span style="font-size: 14px; color: #333;">1/1 (100%)</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #43e97b, #38f9d7); width: 100%; height: 100%;"></div>
+                        </div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">$500/month</div>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 14px; color: #333; font-weight: 600;">Master Licenses</span>
+                            <span style="font-size: 14px; color: #333;">1/3 (33%)</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #4facfe, #00f2fe); width: 33%; height: 100%;"></div>
+                        </div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">$350/month (2 available)</div>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 14px; color: #333; font-weight: 600;">Business User Licenses</span>
+                            <span style="font-size: 14px; color: #333;">5/5 (100%)</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 12px; border-radius: 6px; overflow: hidden;">
+                            <div style="background: linear-gradient(90deg, #f093fb, #f5576c); width: 100%; height: 100%;"></div>
+                        </div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">$1,250/month (All used)</div>
+                    </div>
+                    <div style="margin-top: 25px; padding: 15px; background: white; border-radius: 6px; border-left: 4px solid #667eea;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 5px; color: #333;">Total Monthly Spend</div>
+                        <div style="font-size: 24px; font-weight: 700; color: #667eea;">$1,850</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Annual: $22,200</div>
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: #d4edda; border-radius: 6px;">
+                        <div style="font-size: 13px; color: #155724;">
+                            ✅ <strong>Full Capacity:</strong> All 7 licenses are currently allocated and in use.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Performance & Data Operations -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                
+                <!-- Dashboard Performance -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">📊</span> Dashboard Performance
+                    </h3>
+                    <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 5px; color: #333;">Total Views This Month</div>
+                        <div style="font-size: 28px; font-weight: 700; color: #667eea;">234</div>
+                    </div>
+                    <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #333;">Most Viewed Dashboards</div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #333;">🥇 Sales Performance</span>
+                        <span style="background: #667eea; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">45 views</span>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #333;">🥈 Financial Overview</span>
+                        <span style="background: #4facfe; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">32 views</span>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #333;">🥉 Inventory Analysis</span>
+                        <span style="background: #43e97b; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">28 views</span>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #333;">Customer Analytics</span>
+                        <span style="background: #f093fb; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">21 views</span>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 13px; color: #333;">HR Metrics</span>
+                        <span style="background: #6c757d; color: white; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">15 views</span>
+                    </div>
+                </div>
+
+                <!-- Data Operations -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 20px;">📁</span> Data Operations
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="background: white; padding: 15px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #667eea;">12</div>
+                            <div style="font-size: 13px; color: #666; margin-top: 5px;">Files Uploaded</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #4facfe;">47.5 MB</div>
+                            <div style="font-size: 13px; color: #666; margin-top: 5px;">Total Data Size</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #43e97b;">28</div>
+                            <div style="font-size: 13px; color: #666; margin-top: 5px;">Reports Generated</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 6px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #f093fb;">19</div>
+                            <div style="font-size: 13px; color: #666; margin-top: 5px;">Exports Downloaded</div>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #333;">👥 User Engagement</div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #333;">Avg Logins per User:</strong> 8.5/week
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #333;">Most Active Day:</strong> Tuesday (38 logins)
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #333;">Peak Hours:</strong> 9 AM - 11 AM
+                            </div>
+                            <div>
+                                <strong style="color: #333;">Weekend Activity:</strong> 12%
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 6px;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #333;">⚙️ System Health</div>
+                        <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #333;">Storage Used:</strong> 245 MB / 10 GB (2.5%)
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #333;">API Calls Today:</strong> 342
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <strong style="color: #333;">Failed Requests:</strong> 2 (0.6%)
+                            </div>
+                            <div>
+                                <strong style="color: #333;">Last Backup:</strong> 2 hours ago
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
+                <button onclick="refreshAnalytics()" style="padding: 12px 24px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    🔄 Refresh
+                </button>
+                <button onclick="scheduleReport()" style="padding: 12px 24px; background: #ffc107; color: #333; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    📧 Schedule Email Report
+                </button>
+                <button onclick="downloadReport()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    📊 Download Report
+                </button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Logs Modal -->
+    <div id="logsModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <div>
+                    <h2 style="margin: 0 0 8px 0;">📋 Activity Logs</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.95;">Monitor system activity and audit trail</p>
+                </div>
+                <span class="close" onclick="closeLogsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+
+            <!-- Statistics Cards -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;" id="totalEventsToday">47</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Total Events Today</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;" id="failedLogins">3</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Failed Logins (24h)</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;" id="activeUsers">4</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Active Users Now</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <div style="font-size: 28px; font-weight: 700; margin-bottom: 5px;" id="criticalAlerts">0</div>
+                    <div style="font-size: 13px; opacity: 0.9;">Critical Alerts</div>
+                </div>
+            </div>
+
+            <!-- Filters Section -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">🔍 Filter Logs</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">From Date</label>
+                        <input type="date" id="logFromDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">To Date</label>
+                        <input type="date" id="logToDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Log Type</label>
+                        <select id="logType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="all">All Types</option>
+                            <option value="user_activity">User Activity</option>
+                            <option value="system_changes">System Changes</option>
+                            <option value="security_events">Security Events</option>
+                            <option value="access_attempts">Access Attempts</option>
+                            <option value="data_operations">Data Operations</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">User Filter</label>
+                        <select id="logUserFilter" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="all">All Users</option>
+                            <option value="admin">admin</option>
+                            <option value="kjo2">kjo2</option>
+                            <option value="SCD_CIS">SCD_CIS</option>
+                            <option value="SCD_PUR">SCD_PUR</option>
+                            <option value="SCD_WHS">SCD_WHS</option>
+                            <option value="SCD_SRM">SCD_SRM</option>
+                            <option value="SCD_MGR">SCD_MGR</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <input type="text" id="logSearch" placeholder="Search logs..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <button onclick="applyLogFilters()" style="padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Apply Filters</button>
+                    <button onclick="resetLogFilters()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Reset</button>
+                </div>
+            </div>
+
+            <!-- Logs Table -->
+            <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
+                    <table id="logsTable" style="width: 100%; border-collapse: collapse;">
+                        <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="padding: 15px; text-align: left; font-size: 13px; font-weight: 600; white-space: nowrap;">Timestamp</th>
+                                <th style="padding: 15px; text-align: left; font-size: 13px; font-weight: 600;">User</th>
+                                <th style="padding: 15px; text-align: left; font-size: 13px; font-weight: 600;">Action Type</th>
+                                <th style="padding: 15px; text-align: left; font-size: 13px; font-weight: 600;">Details</th>
+                                <th style="padding: 15px; text-align: left; font-size: 13px; font-weight: 600;">IP Address</th>
+                                <th style="padding: 15px; text-align: left; font-size: 13px; font-weight: 600;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody" style="font-size: 14px;">
+                            <!-- Logs will be inserted here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <div style="font-size: 14px; color: #666;">
+                    Showing <span id="logRangeStart">1</span>-<span id="logRangeEnd">20</span> of <span id="logTotal">0</span> logs
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="previousLogPage()" style="padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 14px;">← Previous</button>
+                    <button onclick="nextLogPage()" style="padding: 8px 16px; background: white; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 14px;">Next →</button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
+                <button onclick="refreshLogs()" style="padding: 12px 24px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    🔄 Refresh Logs
+                </button>
+                <button onclick="exportLogs()" style="padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    📥 Export to CSV
+                </button>
+                <button onclick="clearOldLogs()" style="padding: 12px 24px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    🗑️ Clear Old Logs
+                </button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- System Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 style="margin: 0 0 8px 0;">⚙️ System Settings</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.95;">Configure platform-wide settings and preferences</p>
+                </div>
+                <span class="close" onclick="closeSettingsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+
+            <!-- General Settings -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🏢</span> General Settings
+                </h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Platform Name</label>
+                        <input type="text" id="platformName" value="PULSE Analytics" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Platform URL</label>
+                        <input type="text" id="platformURL" value="pulse.kjo.com" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Time Zone</label>
+                        <select id="timezone" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="UTC">UTC</option>
+                            <option value="EST" selected>Eastern Time (EST)</option>
+                            <option value="PST">Pacific Time (PST)</option>
+                            <option value="IST">India Standard Time (IST)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Date Format</label>
+                        <select id="dateFormat" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🔒</span> Security Settings
+                </h3>
+                <div style="display: grid; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Session Timeout</label>
+                            <select id="sessionTimeout" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                                <option value="15">15 minutes</option>
+                                <option value="30" selected>30 minutes</option>
+                                <option value="60">60 minutes</option>
+                                <option value="120">2 hours</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Failed Login Attempts</label>
+                            <input type="number" id="failedLoginAttempts" value="5" min="3" max="10" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 10px; font-size: 13px; color: #666; font-weight: 500;">Multi-Factor Authentication (MFA)</label>
+                        <div style="display: flex; gap: 15px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="mfa" value="required" checked style="cursor: pointer;">
+                                <span style="font-size: 14px;">Required</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="mfa" value="optional" style="cursor: pointer;">
+                                <span style="font-size: 14px;">Optional</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                <input type="radio" name="mfa" value="disabled" style="cursor: pointer;">
+                                <span style="font-size: 14px;">Disabled</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">IP Whitelist (one per line)</label>
+                        <textarea id="ipWhitelist" rows="3" placeholder="192.168.1.0/24&#10;10.0.0.0/8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: monospace; resize: vertical;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Notifications -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">📧</span> Email Notifications
+                </h3>
+                <div style="display: grid; gap: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">SMTP Server</label>
+                            <input type="text" id="smtpServer" value="smtp.office365.com" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">SMTP Port</label>
+                            <input type="number" id="smtpPort" value="587" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 6px;">
+                        <div style="font-size: 14px; font-weight: 500; margin-bottom: 12px; color: #333;">Notification Preferences</div>
+                        <div style="display: grid; gap: 10px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #555;">New User Registration</span>
+                                <input type="checkbox" id="notifyNewUser" checked style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #555;">License Expiry Warnings</span>
+                                <input type="checkbox" id="notifyLicenseExpiry" checked style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #555;">System Alerts</span>
+                                <input type="checkbox" id="notifySystemAlerts" checked style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #555;">Weekly Usage Reports</span>
+                                <input type="checkbox" id="notifyWeeklyReports" style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MFA Email Configuration -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🔐</span> MFA Email Configuration
+                </h3>
+                <div style="display: grid; gap: 15px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Admin Email for OTP Delivery</label>
+                        <input type="email" id="mfaEmail" placeholder="admin@gmail.com" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">💡 OTP codes will be simulated and shown in browser console for prototype testing</div>
+                    </div>
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 12px;">
+                        <div style="font-size: 13px; color: #856404;">
+                            <strong>📌 Prototype Mode:</strong> Email sending is simulated. In production, this would integrate with SendGrid, Mailgun, or Gmail SMTP to send real OTP codes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Retention -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🗄️</span> Data Retention
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Audit Log Retention</label>
+                        <select id="auditLogRetention" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="30">30 days</option>
+                            <option value="90">90 days</option>
+                            <option value="180">180 days</option>
+                            <option value="365" selected>365 days</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Dashboard Versions</label>
+                        <input type="number" id="dashboardVersions" value="10" min="1" max="50" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Raw Data Auto-Delete</label>
+                        <select id="rawDataAutoDelete" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="30">30 days</option>
+                            <option value="60">60 days</option>
+                            <option value="90" selected>90 days</option>
+                            <option value="never">Never</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integration Settings -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3 style="margin: 0 0 20px 0; font-size: 16px; color: #333; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 20px;">🔗</span> Integration Settings
+                </h3>
+                <div style="display: grid; gap: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 6px; border-left: 4px solid #ffc107;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 14px; font-weight: 600; color: #333; margin-bottom: 5px;">SAP Direct Integration</div>
+                                <div style="font-size: 13px; color: #666;">Phase 2 - Coming Q2 2026</div>
+                            </div>
+                            <span style="background: #fff3cd; color: #856404; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;">PLANNED</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">API Key (Read Only)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="apiKey" value="pk_live_51Hx...7Ky3" readonly style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: #f9f9f9; font-family: monospace;">
+                            <button onclick="regenerateAPIKey()" style="padding: 10px 20px; background: #ff9800; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">Regenerate</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Webhook URL (External Notifications)</label>
+                        <input type="url" id="webhookURL" placeholder="https://your-system.com/webhook" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
+                <button onclick="testEmail()" style="padding: 12px 24px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    📧 Test Email
+                </button>
+                <button onclick="resetSettings()" style="padding: 12px 24px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    ⚠️ Reset to Defaults
+                </button>
+                <button onclick="saveSettings()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    💾 Save Settings
+                </button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Access Rights Modal -->
+    <div id="accessModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 style="margin: 0 0 8px 0;">🔐 Access Rights Configuration</h2>
+                    <p style="margin: 0; font-size: 14px; opacity: 0.95;">Control user permissions and feature access across the platform</p>
+                </div>
+                <span class="close" onclick="closeAccessModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+
+            <!-- Role Permissions Matrix -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">📋 Role Permissions Matrix</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Feature / Module</th>
+                                <th style="padding: 12px; text-align: center; font-weight: 600;">Principal</th>
+                                <th style="padding: 12px; text-align: center; font-weight: 600;">Master</th>
+                                <th style="padding: 12px; text-align: center; font-weight: 600;">Business User</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px; font-weight: 500;">Dashboard Access</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" disabled style="cursor: not-allowed; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked disabled style="cursor: not-allowed; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked disabled style="cursor: not-allowed; width: 18px; height: 18px;"></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee; background: #fafafa;">
+                                <td style="padding: 12px; font-weight: 500;">User Management</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px; font-weight: 500;">License Management</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee; background: #fafafa;">
+                                <td style="padding: 12px; font-weight: 500;">Data Upload</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px; font-weight: 500;">Template Selection</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee; background: #fafafa;">
+                                <td style="padding: 12px; font-weight: 500;">Reports & Analytics</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 12px; font-weight: 500;">System Settings</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                            </tr>
+                            <tr style="background: #fafafa;">
+                                <td style="padding: 12px; font-weight: 500;">Platform Analytics</td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" checked style="cursor: pointer; width: 18px; height: 18px;"></td>
+                                <td style="padding: 12px; text-align: center;"><input type="checkbox" style="cursor: pointer; width: 18px; height: 18px;"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Two Column Layout -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <!-- User-Specific Overrides -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">👤 User-Specific Overrides</h3>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-size: 13px; color: #666; font-weight: 500;">Select User</label>
+                        <select id="overrideUser" onchange="loadUserPermissions()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <option value="">-- Choose User --</option>
+                            <option value="admin">admin (Principal)</option>
+                            <option value="kjo2">kjo2 (Master)</option>
+                            <option value="SCD_CIS">SCD_CIS (Business User)</option>
+                            <option value="SCD_PUR">SCD_PUR (Business User)</option>
+                            <option value="SCD_WHS">SCD_WHS (Business User)</option>
+                            <option value="SCD_SRM">SCD_SRM (Business User)</option>
+                            <option value="SCD_MGR">SCD_MGR (Business User)</option>
+                        </select>
+                    </div>
+                    <div id="userPermissions" style="display: none;">
+                        <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #333;">Upload Raw Data (Override)</span>
+                                <input type="checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #333;">Export Reports (PDF/Excel)</span>
+                                <input type="checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #333;">Request Custom Templates</span>
+                                <input type="checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                                <span style="font-size: 14px; color: #333;">Communicate with PULSE Team</span>
+                                <input type="checkbox" style="width: 18px; height: 18px; cursor: pointer;">
+                            </label>
+                        </div>
+                        <button onclick="resetUserPermissions()" style="width: 100%; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 10px;">Reset to Role Default</button>
+                    </div>
+                </div>
+
+                <!-- Feature Access Control -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">⚙️ System-Wide Feature Toggles</h3>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <div>
+                                <div style="font-size: 14px; color: #333; font-weight: 500;">Export Reports (PDF/Excel)</div>
+                                <div style="font-size: 12px; color: #999;">Allow Master & Business Users to export</div>
+                            </div>
+                            <input type="checkbox" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        </label>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <div>
+                                <div style="font-size: 14px; color: #333; font-weight: 500;">Download Dashboard Files</div>
+                                <div style="font-size: 12px; color: #999;">🔒 Security: Always disabled</div>
+                            </div>
+                            <input type="checkbox" disabled style="width: 18px; height: 18px; cursor: not-allowed;">
+                        </label>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <div>
+                                <div style="font-size: 14px; color: #333; font-weight: 500;">SAP Data Upload</div>
+                                <div style="font-size: 12px; color: #999;">Allow Master users to upload raw data</div>
+                            </div>
+                            <input type="checkbox" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        </label>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <div>
+                                <div style="font-size: 14px; color: #333; font-weight: 500;">PULSE Team Communication</div>
+                                <div style="font-size: 12px; color: #999;">Master can request data scientist support</div>
+                            </div>
+                            <input type="checkbox" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        </label>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <div>
+                                <div style="font-size: 14px; color: #333; font-weight: 500;">Custom Template Requests</div>
+                                <div style="font-size: 12px; color: #999;">Master can request new templates</div>
+                            </div>
+                            <input type="checkbox" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        </label>
+                    </div>
+                    <div style="background: white; padding: 12px; border-radius: 6px;">
+                        <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                            <div>
+                                <div style="font-size: 14px; color: #333; font-weight: 500;">Audit Trail Logging</div>
+                                <div style="font-size: 12px; color: #999;">🔒 Always enabled (365 days)</div>
+                            </div>
+                            <input type="checkbox" checked disabled style="width: 18px; height: 18px; cursor: not-allowed;">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Access Logs Preview -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #333;">📊 Recent Access Changes</h3>
+                <div style="background: white; border-radius: 6px; overflow: hidden;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
+                                <th style="padding: 10px; text-align: left; font-size: 13px; color: #666; font-weight: 600;">User</th>
+                                <th style="padding: 10px; text-align: left; font-size: 13px; color: #666; font-weight: 600;">Action</th>
+                                <th style="padding: 10px; text-align: left; font-size: 13px; color: #666; font-weight: 600;">Timestamp</th>
+                                <th style="padding: 10px; text-align: center; font-size: 13px; color: #666; font-weight: 600;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #f0f0f0;">
+                                <td style="padding: 10px; font-size: 13px;">admin</td>
+                                <td style="padding: 10px; font-size: 13px;">Granted User Management access to kjo2</td>
+                                <td style="padding: 10px; font-size: 13px; color: #999;">2 hours ago</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">✓ Success</span></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f0f0f0;">
+                                <td style="padding: 10px; font-size: 13px;">admin</td>
+                                <td style="padding: 10px; font-size: 13px;">Enabled API Access globally</td>
+                                <td style="padding: 10px; font-size: 13px; color: #999;">5 hours ago</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">✓ Success</span></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f0f0f0;">
+                                <td style="padding: 10px; font-size: 13px;">admin</td>
+                                <td style="padding: 10px; font-size: 13px;">Revoked Bulk Operations for Business Users</td>
+                                <td style="padding: 10px; font-size: 13px; color: #999;">1 day ago</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">✓ Success</span></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f0f0f0;">
+                                <td style="padding: 10px; font-size: 13px;">admin</td>
+                                <td style="padding: 10px; font-size: 13px;">Updated permissions matrix</td>
+                                <td style="padding: 10px; font-size: 13px; color: #999;">2 days ago</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">✓ Success</span></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-size: 13px;">kjo2</td>
+                                <td style="padding: 10px; font-size: 13px;">Attempted to modify system settings</td>
+                                <td style="padding: 10px; font-size: 13px; color: #999;">3 days ago</td>
+                                <td style="padding: 10px; text-align: center;"><span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 12px;">✗ Denied</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
+                <button onclick="exportAccessConfig()" style="padding: 12px 24px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    📥 Export Config
+                </button>
+                <button onclick="resetAllPermissions()" style="padding: 12px 24px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    🔄 Reset All
+                </button>
+                <button onclick="saveAccessChanges()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    💾 Save Changes
+                </button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- License Management Modal -->
+    <div id="licenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔑 License Management</h2>
+                <span class="close" onclick="closeLicenseModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- License Summary Cards -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Total Licenses</div>
+                        <div style="font-size: 36px; font-weight: bold;">7</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #4caf50 0%, #45a049 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Licenses Used</div>
+                        <div style="font-size: 36px; font-weight: bold;">7</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Available</div>
+                        <div style="font-size: 36px; font-weight: bold;">0</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Days Remaining</div>
+                        <div style="font-size: 36px; font-weight: bold;">39</div>
+                    </div>
+                </div>
+
+                <!-- Cost Summary -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">💰 Cost Summary</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; font-size: 14px;">
+                        <div>
+                            <div style="color: #999; margin-bottom: 5px;">Monthly Cost</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #333;">$1,850</div>
+                        </div>
+                        <div>
+                            <div style="color: #999; margin-bottom: 5px;">Annual Cost</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #333;">$22,200</div>
+                        </div>
+                        <div>
+                            <div style="color: #999; margin-bottom: 5px;">Next Billing</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #333;">Jan 1, 2026</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="btn-primary" onclick="purchaseLicenses()">+ Purchase More Licenses</button>
+                    <button class="btn-primary" onclick="renewSubscription()">⏰ Renew Subscription</button>
+                </div>
+
+                <!-- License Allocation Table -->
+                <h3 style="color: #667eea; margin-bottom: 15px;">License Allocation</h3>
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Role</th>
+                            <th>License Type</th>
+                            <th>Cost/Month</th>
+                            <th>Assigned Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>admin</td>
+                            <td><span class="role-badge role-principal">Principal</span></td>
+                            <td>Full Access</td>
+                            <td style="font-weight: 600; color: #667eea;">$500</td>
+                            <td>Jan 01, 2025</td>
+                            <td>
+                                <button class="action-btn" onclick="alert('Cannot modify admin license')" title="Protected" style="opacity: 0.3; cursor: not-allowed;">🔒</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>kjo2</td>
+                            <td><span class="role-badge role-master">Master</span></td>
+                            <td>Power User</td>
+                            <td style="font-weight: 600; color: #ff9800;">$350</td>
+                            <td>Jan 01, 2025</td>
+                            <td>
+                                <button class="action-btn" onclick="reassignLicense('kjo2')" title="Reassign">🔄</button>
+                                <button class="action-btn" onclick="revokeLicense('kjo2')" title="Revoke">✖️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_CIS</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td>View Only</td>
+                            <td style="font-weight: 600; color: #4caf50;">$250</td>
+                            <td>Jan 15, 2025</td>
+                            <td>
+                                <button class="action-btn" onclick="reassignLicense('SCD_CIS')" title="Reassign">🔄</button>
+                                <button class="action-btn" onclick="revokeLicense('SCD_CIS')" title="Revoke">✖️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_PUR</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td>View Only</td>
+                            <td style="font-weight: 600; color: #4caf50;">$250</td>
+                            <td>Jan 20, 2025</td>
+                            <td>
+                                <button class="action-btn" onclick="reassignLicense('SCD_PUR')" title="Reassign">🔄</button>
+                                <button class="action-btn" onclick="revokeLicense('SCD_PUR')" title="Revoke">✖️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_WHS</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td>View Only</td>
+                            <td style="font-weight: 600; color: #4caf50;">$250</td>
+                            <td>Jan 22, 2025</td>
+                            <td>
+                                <button class="action-btn" onclick="reassignLicense('SCD_WHS')" title="Reassign">🔄</button>
+                                <button class="action-btn" onclick="revokeLicense('SCD_WHS')" title="Revoke">✖️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_SRM</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td>View Only</td>
+                            <td style="font-weight: 600; color: #4caf50;">$250</td>
+                            <td>Jan 25, 2025</td>
+                            <td>
+                                <button class="action-btn" onclick="reassignLicense('SCD_SRM')" title="Reassign">🔄</button>
+                                <button class="action-btn" onclick="revokeLicense('SCD_SRM')" title="Revoke">✖️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_MGR</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td>View Only</td>
+                            <td style="font-weight: 600; color: #4caf50;">$250</td>
+                            <td>Jan 28, 2025</td>
+                            <td>
+                                <button class="action-btn" onclick="reassignLicense('SCD_MGR')" title="Reassign">🔄</button>
+                                <button class="action-btn" onclick="revokeLicense('SCD_MGR')" title="Revoke">✖️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- License Types Reference -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📋 License Types & Pricing</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <div style="font-weight: 600; color: #333; margin-bottom: 8px;">Full Access</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #667eea; margin-bottom: 5px;">$500<span style="font-size: 14px; font-weight: normal; color: #999;">/month</span></div>
+                            <div style="font-size: 13px; color: #666;">Principal role with full system access</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #ff9800;">
+                            <div style="font-weight: 600; color: #333; margin-bottom: 8px;">Power User</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #ff9800; margin-bottom: 5px;">$350<span style="font-size: 14px; font-weight: normal; color: #999;">/month</span></div>
+                            <div style="font-size: 13px; color: #666;">Master role with upload & management capabilities</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #4caf50;">
+                            <div style="font-weight: 600; color: #333; margin-bottom: 8px;">View Only</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #4caf50; margin-bottom: 5px;">$250<span style="font-size: 14px; font-weight: normal; color: #999;">/month</span></div>
+                            <div style="font-size: 13px; color: #666;">Business User with dashboard viewing access</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Usage Analytics -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📊 Usage Analytics (Last 30 Days)</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; font-size: 14px;">
+                        <div>
+                            <div style="color: #999; margin-bottom: 5px;">License Utilization</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #4caf50;">100%</div>
+                        </div>
+                        <div>
+                            <div style="color: #999; margin-bottom: 5px;">Most Active User</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #333;">kjo2</div>
+                        </div>
+                        <div>
+                            <div style="color: #999; margin-bottom: 5px;">Avg Session Time</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #333;">28 min</div>
+                        </div>
+                        <div>
+                            <div style="color: #999; margin-bottom: 5px;">Total Logins</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #333;">248</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👥 User Management</h2>
+                <span class="close" onclick="closeUserModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <button class="add-user-btn" onclick="toggleUserForm()">+ Add New User</button>
+                
+                <!-- Add User Form -->
+                <div id="userForm" class="user-form">
+                    <h3 style="margin-bottom: 20px; color: #667eea;">Create New User</h3>
+                    <div class="form-group">
+                        <label for="newUserId">User ID</label>
+                        <input type="text" id="newUserId" placeholder="Enter user ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Password</label>
+                        <input type="password" id="newPassword" placeholder="Enter password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm password">
+                    </div>
+                    <div class="form-group">
+                        <label for="userRole">Role</label>
+                        <select id="userRole">
+                            <option value="principal">Principal</option>
+                            <option value="master">Master</option>
+                            <option value="business_user" selected>Business User</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-secondary" onclick="toggleUserForm()">Cancel</button>
+                        <button class="btn-primary" onclick="addUser()">Create User</button>
+                    </div>
+                </div>
+
+                <!-- User Table -->
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr>
+                            <td>admin</td>
+                            <td><span class="role-badge role-principal">Principal</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>Just now</td>
+                            <td>
+                                <button class="action-btn" onclick="editUser('admin')" title="Edit">✏️</button>
+                                <button class="action-btn" onclick="alert('Cannot delete admin user')" title="Delete" style="opacity: 0.3; cursor: not-allowed;">🗑️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>kjo2</td>
+                            <td><span class="role-badge role-master">Master</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>2 hours ago</td>
+                            <td>
+                                <button class="action-btn" onclick="editUser('kjo2')" title="Edit">✏️</button>
+                                <button class="action-btn" onclick="deleteUser('kjo2')" title="Delete">🗑️</button>
+                                <button class="action-btn" onclick="toggleStatus('kjo2')" title="Suspend">⏸️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_CIS</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>1 hour ago</td>
+                            <td>
+                                <button class="action-btn" onclick="editUser('SCD_CIS')" title="Edit">✏️</button>
+                                <button class="action-btn" onclick="deleteUser('SCD_CIS')" title="Delete">🗑️</button>
+                                <button class="action-btn" onclick="toggleStatus('SCD_CIS')" title="Suspend">⏸️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_PUR</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>2 hours ago</td>
+                            <td>
+                                <button class="action-btn" onclick="editUser('SCD_PUR')" title="Edit">✏️</button>
+                                <button class="action-btn" onclick="deleteUser('SCD_PUR')" title="Delete">🗑️</button>
+                                <button class="action-btn" onclick="toggleStatus('SCD_PUR')" title="Suspend">⏸️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_WHS</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>3 hours ago</td>
+                            <td>
+                                <button class="action-btn" onclick="editUser('SCD_WHS')" title="Edit">✏️</button>
+                                <button class="action-btn" onclick="deleteUser('SCD_WHS')" title="Delete">🗑️</button>
+                                <button class="action-btn" onclick="toggleStatus('SCD_WHS')" title="Suspend">⏸️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_SRM</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>5 hours ago</td>
+                            <td>
+                                <button class="action-btn" onclick="editUser('SCD_SRM')" title="Edit">✏️</button>
+                                <button class="action-btn" onclick="deleteUser('SCD_SRM')" title="Delete">🗑️</button>
+                                <button class="action-btn" onclick="toggleStatus('SCD_SRM')" title="Suspend">⏸️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>SCD_MGR</td>
+                            <td><span class="role-badge role-business">Business User</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                            <td>Yesterday</td>
+                            <td>
+                                <button class="action-btn" onclick="editUser('SCD_MGR')" title="Edit">✏️</button>
+                                <button class="action-btn" onclick="deleteUser('SCD_MGR')" title="Delete">🗑️</button>
+                                <button class="action-btn" onclick="toggleStatus('SCD_MGR')" title="Suspend">⏸️</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 3% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 1000px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .close {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            line-height: 1;
+        }
+
+        .close:hover {
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .add-user-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .add-user-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-table thead {
+            background: #f8f9fa;
+        }
+
+        .user-table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .user-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            color: #666;
+        }
+
+        .user-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .role-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .role-principal {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .role-master {
+            background: #ff9800;
+            color: white;
+        }
+
+        .role-business {
+            background: #667eea;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .status-inactive {
+            background: #f44336;
+            color: white;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.3);
+        }
+
+        .user-form {
+            display: none;
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+
+    <script>
+        // Check if user is logged in and is admin
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        } else if (currentUser.role !== 'principal') {
+            alert('Access denied! Admin privileges required.');
+            window.location.href = 'dashboard.html';
+        } else {
+            document.getElementById('userName').textContent = currentUser.user_id;
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+
+        // User Management Modal Functions
+        function openUserModal() {
+            document.getElementById('userModal').style.display = 'block';
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+            document.getElementById('userForm').style.display = 'none';
+        }
+
+        function toggleUserForm() {
+            const form = document.getElementById('userForm');
+            form.style.display = form.style.display === 'none' || form.style.display === '' ? 'block' : 'none';
+            
+            // Clear form fields
+            if (form.style.display === 'block') {
+                document.getElementById('newUserId').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('userRole').value = 'business_user';
+            }
+        }
+
+        function addUser() {
+            const userId = document.getElementById('newUserId').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const role = document.getElementById('userRole').value;
+
+            if (!userId || !password || !confirmPassword) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+
+            // In a real app, this would save to database
+            alert(`User "${userId}" created successfully!\n\nNote: This is a demo. In production, this would save to users.csv and update the database.`);
+            
+            toggleUserForm();
+            // Refresh the page to show new user
+            // location.reload();
+        }
+
+        function editUser(userId) {
+            alert(`Edit user: ${userId}\n\nIn production, this would open an edit form to update:\n- Password\n- Role\n- Status\n- Permissions`);
+        }
+
+        function deleteUser(userId) {
+            if (confirm(`Are you sure you want to delete user "${userId}"?\n\nThis action cannot be undone.`)) {
+                alert(`User "${userId}" deleted successfully!\n\nNote: This is a demo. In production, this would remove from users.csv.`);
+                // In real app: remove from CSV and reload
+            }
+        }
+
+        function toggleStatus(userId) {
+            if (confirm(`Suspend user "${userId}"?\n\nThey will not be able to login until reactivated.`)) {
+                alert(`User "${userId}" suspended!\n\nNote: This is a demo. In production, this would update the status in users.csv.`);
+            }
+        }
+
+        // License Management Functions
+        function openLicenseModal() {
+            document.getElementById('licenseModal').style.display = 'block';
+        }
+
+        function closeLicenseModal() {
+            document.getElementById('licenseModal').style.display = 'none';
+        }
+
+        function purchaseLicenses() {
+            const quantity = prompt('How many additional licenses would you like to purchase?\n\nCurrent: 4 licenses\nAvailable: 0 licenses', '2');
+            
+            if (quantity && !isNaN(quantity) && parseInt(quantity) > 0) {
+                const count = parseInt(quantity);
+                const estimatedCost = count * 250; // Base calculation
+                alert(`Purchase Request:\n\n✓ Additional Licenses: ${count}\n✓ Estimated Monthly Cost: $${estimatedCost}\n✓ New Total: ${4 + count} licenses\n\nNote: This is a demo. In production, this would process payment and update license count.`);
+            }
+        }
+
+        function renewSubscription() {
+            if (confirm('Renew subscription for another year?\n\nCurrent Expiry: Dec 31, 2025\nNew Expiry: Dec 31, 2026\nAnnual Cost: $13,200\n\nProceed with renewal?')) {
+                alert('Subscription Renewal Successful!\n\n✓ New Expiry Date: Dec 31, 2026\n✓ Payment Processed: $13,200\n✓ Receipt sent to admin email\n\nNote: This is a demo. In production, this would process payment.');
+            }
+        }
+
+        function reassignLicense(userId) {
+            const newUser = prompt(`Reassign license from "${userId}" to which user?\n\nEnter new user ID:`);
+            
+            if (newUser && newUser.trim()) {
+                alert(`License Reassignment:\n\n✓ Removed from: ${userId}\n✓ Assigned to: ${newUser}\n✓ License type maintained\n\nNote: This is a demo. In production, this would update users.csv and notify both users.`);
+            }
+        }
+
+        function revokeLicense(userId) {
+            if (confirm(`Revoke license for "${userId}"?\n\nThis will:\n• Remove their system access immediately\n• Free up 1 license\n• User can be re-activated later\n\nAre you sure?`)) {
+                alert(`License Revoked!\n\n✓ User: ${userId}\n✓ Access removed\n✓ License freed up\n✓ Available licenses: 1\n\nNote: This is a demo. In production, this would update status in users.csv.`);
+            }
+        }
+
+        // Access Rights Modal Functions
+        function openAccessModal() {
+            document.getElementById('accessModal').style.display = 'block';
+        }
+
+        function closeAccessModal() {
+            document.getElementById('accessModal').style.display = 'none';
+            document.getElementById('overrideUser').value = '';
+            document.getElementById('userPermissions').style.display = 'none';
+        }
+
+        // System Settings Modal Functions
+        function openSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'block';
+            loadSettings();
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function loadSettings() {
+            // Load settings from localStorage or use defaults
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || getDefaultSettings();
+            
+            document.getElementById('platformName').value = settings.platformName;
+            document.getElementById('platformURL').value = settings.platformURL;
+            document.getElementById('timezone').value = settings.timezone;
+            document.getElementById('dateFormat').value = settings.dateFormat;
+            document.getElementById('sessionTimeout').value = settings.sessionTimeout;
+            document.getElementById('failedLoginAttempts').value = settings.failedLoginAttempts;
+            document.getElementById('ipWhitelist').value = settings.ipWhitelist;
+            document.getElementById('smtpServer').value = settings.smtpServer;
+            document.getElementById('smtpPort').value = settings.smtpPort;
+            document.getElementById('notifyNewUser').checked = settings.notifyNewUser;
+            document.getElementById('notifyLicenseExpiry').checked = settings.notifyLicenseExpiry;
+            document.getElementById('notifySystemAlerts').checked = settings.notifySystemAlerts;
+            document.getElementById('notifyWeeklyReports').checked = settings.notifyWeeklyReports;
+            document.getElementById('mfaEmail').value = settings.mfaEmail || '';
+            document.getElementById('auditLogRetention').value = settings.auditLogRetention;
+            document.getElementById('dashboardVersions').value = settings.dashboardVersions;
+            document.getElementById('rawDataAutoDelete').value = settings.rawDataAutoDelete;
+            document.getElementById('apiKey').value = settings.apiKey;
+            document.getElementById('webhookURL').value = settings.webhookURL;
+            
+            // Set MFA radio button
+            const mfaRadios = document.getElementsByName('mfa');
+            mfaRadios.forEach(radio => {
+                if (radio.value === settings.mfa) {
+                    radio.checked = true;
+                }
+            });
+        }
+
+        function getDefaultSettings() {
+            return {
+                platformName: 'PULSE Analytics',
+                platformURL: 'pulse.kjo.com',
+                timezone: 'EST',
+                dateFormat: 'DD/MM/YYYY',
+                sessionTimeout: '30',
+                failedLoginAttempts: '5',
+                mfa: 'required',
+                ipWhitelist: '',
+                smtpServer: 'smtp.office365.com',
+                smtpPort: '587',
+                notifyNewUser: true,
+                notifyLicenseExpiry: true,
+                notifySystemAlerts: true,
+                notifyWeeklyReports: false,
+                mfaEmail: '',
+                auditLogRetention: '365',
+                dashboardVersions: '10',
+                rawDataAutoDelete: '90',
+                apiKey: 'pk_live_51Hx...7Ky3',
+                webhookURL: ''
+            };
+        }
+
+        function saveSettings() {
+            const mfaRadios = document.getElementsByName('mfa');
+            let mfaValue = 'required';
+            mfaRadios.forEach(radio => {
+                if (radio.checked) mfaValue = radio.value;
+            });
+
+            const settings = {
+                platformName: document.getElementById('platformName').value,
+                platformURL: document.getElementById('platformURL').value,
+                timezone: document.getElementById('timezone').value,
+                dateFormat: document.getElementById('dateFormat').value,
+                sessionTimeout: document.getElementById('sessionTimeout').value,
+                failedLoginAttempts: document.getElementById('failedLoginAttempts').value,
+                mfa: mfaValue,
+                ipWhitelist: document.getElementById('ipWhitelist').value,
+                smtpServer: document.getElementById('smtpServer').value,
+                smtpPort: document.getElementById('smtpPort').value,
+                notifyNewUser: document.getElementById('notifyNewUser').checked,
+                notifyLicenseExpiry: document.getElementById('notifyLicenseExpiry').checked,
+                notifySystemAlerts: document.getElementById('notifySystemAlerts').checked,
+                notifyWeeklyReports: document.getElementById('notifyWeeklyReports').checked,
+                mfaEmail: document.getElementById('mfaEmail').value.trim(),
+                auditLogRetention: document.getElementById('auditLogRetention').value,
+                dashboardVersions: document.getElementById('dashboardVersions').value,
+                rawDataAutoDelete: document.getElementById('rawDataAutoDelete').value,
+                apiKey: document.getElementById('apiKey').value,
+                webhookURL: document.getElementById('webhookURL').value
+            };
+
+            localStorage.setItem('systemSettings', JSON.stringify(settings));
+            
+            // Initialize session timeout monitor
+            initSessionTimeout();
+            
+            alert('✅ System Settings Saved Successfully!\n\n' +
+                  '📋 Settings Applied:\n' +
+                  `• Platform: ${settings.platformName}\n` +
+                  `• Session Timeout: ${settings.sessionTimeout} minutes\n` +
+                  `• MFA: ${settings.mfa.toUpperCase()}\n` +
+                  `• Date Format: ${settings.dateFormat}\n` +
+                  `• Timezone: ${settings.timezone}\n\n` +
+                  '✓ All settings saved to local storage\n' +
+                  '✓ Session timeout monitoring active\n' +
+                  '✓ Security policies updated');
+            
+            closeSettingsModal();
+        }
+
+        function resetSettings() {
+            if (confirm('⚠️ Reset All Settings to Factory Defaults?\n\n' +
+                       'This will:\n' +
+                       '• Clear all custom configurations\n' +
+                       '• Reset to original values\n' +
+                       '• Regenerate API key\n' +
+                       '• Clear IP whitelist\n\n' +
+                       'This action cannot be undone. Continue?')) {
+                
+                const defaults = getDefaultSettings();
+                // Generate new API key on reset
+                defaults.apiKey = 'pk_live_' + Math.random().toString(36).substr(2, 12) + '...' + Math.random().toString(36).substr(2, 5);
+                
+                localStorage.setItem('systemSettings', JSON.stringify(defaults));
+                loadSettings();
+                
+                alert('✅ Settings Reset Complete!\n\n' +
+                      'All system settings restored to factory defaults.\n' +
+                      'New API key generated.\n\n' +
+                      'Please click Save to confirm these changes.');
+            }
+        }
+
+        function testEmail() {
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || getDefaultSettings();
+            const timestamp = new Date().toLocaleString('en-US', { 
+                timeZone: settings.timezone === 'EST' ? 'America/New_York' : 
+                          settings.timezone === 'PST' ? 'America/Los_Angeles' : 
+                          settings.timezone === 'IST' ? 'Asia/Kolkata' : 'UTC'
+            });
+            
+            const activeNotifications = [];
+            if (settings.notifyNewUser) activeNotifications.push('New User Registration');
+            if (settings.notifyLicenseExpiry) activeNotifications.push('License Expiry Warnings');
+            if (settings.notifySystemAlerts) activeNotifications.push('System Alerts');
+            if (settings.notifyWeeklyReports) activeNotifications.push('Weekly Usage Reports');
+            
+            alert('📧 Email Configuration Test\n\n' +
+                  'SMTP Configuration:\n' +
+                  `• Server: ${settings.smtpServer}\n` +
+                  `• Port: ${settings.smtpPort}\n` +
+                  `• Connection: Simulated (Prototype)\n\n` +
+                  'Test Email Details:\n' +
+                  `• To: admin@kjo.com\n` +
+                  `• From: ${settings.platformName} <noreply@${settings.platformURL}>\n` +
+                  `• Subject: Test Email from ${settings.platformName}\n` +
+                  `• Timestamp: ${timestamp}\n\n` +
+                  `Active Notifications (${activeNotifications.length}):\n` +
+                  `${activeNotifications.map(n => '✓ ' + n).join('\n')}\n\n` +
+                  '✅ Configuration Valid\n' +
+                  '⚠️  Actual sending requires backend integration');
+        }
+
+        function regenerateAPIKey() {
+            if (confirm('⚠️ Regenerate API Key?\n\n' +
+                       'WARNING: This will:\n' +
+                       '• Invalidate current API key immediately\n' +
+                       '• Break existing integrations\n' +
+                       '• Require updating all connected systems\n\n' +
+                       'Generate new key?')) {
+                
+                const newKey = 'pk_live_' + Math.random().toString(36).substr(2, 12) + 
+                              Math.random().toString(36).substr(2, 8).toUpperCase() + 
+                              '...' + Math.random().toString(36).substr(2, 5);
+                
+                document.getElementById('apiKey').value = newKey;
+                
+                const settings = JSON.parse(localStorage.getItem('systemSettings')) || getDefaultSettings();
+                settings.apiKey = newKey;
+                localStorage.setItem('systemSettings', JSON.stringify(settings));
+                
+                alert('✅ New API Key Generated!\n\n' +
+                      `Key: ${newKey}\n\n` +
+                      '⚠️  IMPORTANT:\n' +
+                      '• Old key is now invalid\n' +
+                      '• Update all integrations immediately\n' +
+                      '• Store this key securely\n' +
+                      '• Key has been saved to settings\n\n' +
+                      '📋 Copy this key before closing this dialog!');
+            }
+        }
+
+        // Session Timeout Management
+        let sessionTimeoutTimer = null;
+        let lastActivityTime = Date.now();
+
+        function initSessionTimeout() {
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || getDefaultSettings();
+            const timeoutMinutes = parseInt(settings.sessionTimeout);
+            const timeoutMs = timeoutMinutes * 60 * 1000;
+
+            // Clear existing timer
+            if (sessionTimeoutTimer) {
+                clearTimeout(sessionTimeoutTimer);
+            }
+
+            // Reset activity timer on user interactions
+            ['mousedown', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+                document.addEventListener(event, () => {
+                    lastActivityTime = Date.now();
+                });
+            });
+
+            // Check for timeout every minute
+            function checkTimeout() {
+                const inactiveTime = Date.now() - lastActivityTime;
+                
+                if (inactiveTime >= timeoutMs) {
+                    alert(`🔒 Session Timeout\n\nYou've been inactive for ${timeoutMinutes} minutes.\n\nFor security, you will be logged out.`);
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                } else {
+                    sessionTimeoutTimer = setTimeout(checkTimeout, 60000); // Check every minute
+                }
+            }
+
+            sessionTimeoutTimer = setTimeout(checkTimeout, 60000);
+        }
+
+        // Initialize session timeout on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initSessionTimeout();
+        });
+
+        function loadUserPermissions() {
+            const user = document.getElementById('overrideUser').value;
+            const permDiv = document.getElementById('userPermissions');
+            
+            if (user) {
+                permDiv.style.display = 'block';
+                // In production, load user-specific permissions from backend
+            } else {
+                permDiv.style.display = 'none';
+            }
+        }
+
+        function resetUserPermissions() {
+            const user = document.getElementById('overrideUser').value;
+            if (!user) {
+                alert('Please select a user first.');
+                return;
+            }
+            
+            if (confirm(`Reset permissions for ${user} to their role defaults?\n\nThis will remove all custom overrides.`)) {
+                alert(`Permissions Reset!\n\n✓ User: ${user}\n✓ Reverted to role-based defaults\n✓ All custom overrides removed\n\nNote: This is a demo. In production, this would update the database.`);
+                document.getElementById('overrideUser').value = '';
+                document.getElementById('userPermissions').style.display = 'none';
+            }
+        }
+
+        function saveAccessChanges() {
+            alert('Access Configuration Saved!\n\n✓ Permissions matrix updated\n✓ User overrides applied\n✓ Feature access rules saved\n✓ Changes logged\n\nNote: This is a demo. In production, this would:\n• Update database permissions\n• Sync with authentication system\n• Send notifications to affected users\n• Create audit trail entries');
+        }
+
+        function resetAllPermissions() {
+            if (confirm('⚠️ Reset ALL Permissions to System Defaults?\n\nThis will:\n• Clear all custom role permissions\n• Remove user-specific overrides\n• Reset feature access to defaults\n• Cannot be undone\n\nProceed with reset?')) {
+                alert('All Permissions Reset!\n\n✓ Role matrix restored to defaults\n✓ User overrides cleared\n✓ Feature access reset\n✓ System baseline applied\n\nNote: This is a demo. In production, this would require administrator confirmation and create a full backup.');
+            }
+        }
+
+        function exportAccessConfig() {
+            alert('Exporting Access Configuration...\n\n📥 Generating files:\n• permissions_matrix.csv\n• user_overrides.csv\n• feature_access.csv\n• access_logs.csv\n\n✓ Export package created\n✓ Download starting...\n\nNote: This is a demo. In production, this would generate and download actual CSV files.');
+        }
+
+        // Platform Analytics Modal Functions
+        let analyticsPeriod = '7days';
+
+        function openAnalyticsModal() {
+            document.getElementById('analyticsModal').style.display = 'block';
+            setAnalyticsPeriod('7days');
+        }
+
+        function closeAnalyticsModal() {
+            document.getElementById('analyticsModal').style.display = 'none';
+        }
+
+        function setAnalyticsPeriod(period) {
+            analyticsPeriod = period;
+            
+            // Reset all buttons
+            ['btnToday', 'btn7days', 'btn30days', 'btn90days'].forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                btn.style.background = 'white';
+                btn.style.border = '2px solid #667eea';
+                btn.style.color = '#667eea';
+            });
+            
+            // Highlight selected button
+            const selectedBtn = document.getElementById('btn' + period);
+            selectedBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            selectedBtn.style.border = 'none';
+            selectedBtn.style.color = 'white';
+            
+            // Update analytics data based on period
+            updateAnalyticsData(period);
+        }
+
+        function updateAnalyticsData(period) {
+            const data = {
+                'today': { logins: 8, label: 'Today' },
+                '7days': { logins: 127, label: 'Last 7 Days' },
+                '30days': { logins: 234, label: 'Last 30 Days' },
+                '90days': { logins: 687, label: 'Last 90 Days' }
+            };
+            
+            const selectedData = data[period];
+            document.getElementById('totalLoginsMonth').textContent = selectedData.logins;
+            
+            console.log(`Analytics updated for: ${selectedData.label}`);
+        }
+
+        function refreshAnalytics() {
+            updateAnalyticsData(analyticsPeriod);
+            alert('✅ Analytics Refreshed!\n\nPlatform analytics data has been updated with latest metrics.');
+        }
+
+        function downloadReport() {
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || { dateFormat: 'DD/MM/YYYY' };
+            const timestamp = new Date().toLocaleString();
+            
+            const reportData = {
+                period: analyticsPeriod,
+                totalUsers: 4,
+                totalLogins: document.getElementById('totalLoginsMonth').textContent,
+                avgSession: '28 minutes',
+                uptime: '99.8%',
+                licenseSpend: '$1,100/month'
+            };
+            
+            alert('📊 Downloading Analytics Report...\n\n' +
+                  `Period: ${analyticsPeriod}\n` +
+                  `Total Users: ${reportData.totalUsers}\n` +
+                  `Total Logins: ${reportData.totalLogins}\n` +
+                  `Avg Session: ${reportData.avgSession}\n` +
+                  `System Uptime: ${reportData.uptime}\n` +
+                  `License Spend: ${reportData.licenseSpend}\n\n` +
+                  `Date Format: ${settings.dateFormat}\n` +
+                  `Generated: ${timestamp}\n\n` +
+                  'Format Options:\n' +
+                  '• PDF Report (Executive Summary)\n' +
+                  '• Excel Spreadsheet (Detailed Data)\n' +
+                  '• CSV Export (Raw Data)\n\n' +
+                  '✓ Download simulated\n' +
+                  'In production, file download would start automatically.');
+        }
+
+        function scheduleReport() {
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || { mfaEmail: 'admin@kjo.com' };
+            
+            const frequency = prompt('📧 Schedule Analytics Report\n\n' +
+                                    'Select frequency:\n' +
+                                    '1 = Daily (9 AM)\n' +
+                                    '2 = Weekly (Monday 9 AM)\n' +
+                                    '3 = Monthly (1st, 9 AM)\n\n' +
+                                    'Enter 1, 2, or 3:');
+            
+            if (frequency) {
+                const schedules = {
+                    '1': 'Daily at 9:00 AM',
+                    '2': 'Weekly on Monday at 9:00 AM',
+                    '3': 'Monthly on 1st at 9:00 AM'
+                };
+                
+                const schedule = schedules[frequency] || 'Invalid selection';
+                
+                if (schedules[frequency]) {
+                    alert('✅ Report Scheduled!\n\n' +
+                          `Frequency: ${schedule}\n` +
+                          `Email To: ${settings.mfaEmail || 'admin@kjo.com'}\n` +
+                          `Format: PDF Executive Summary\n` +
+                          `Timezone: EST\n\n` +
+                          'Report Details:\n' +
+                          '• Platform usage metrics\n' +
+                          '• License utilization\n' +
+                          '• Dashboard performance\n' +
+                          '• User engagement stats\n\n' +
+                          '✓ Schedule saved\n' +
+                          'In production, automated emails would be sent.');
+                } else {
+                    alert('❌ Invalid selection. Please try again.');
+                }
+            }
+        }
+
+        // Activity Logs Modal Functions
+        let currentLogPage = 1;
+        const logsPerPage = 20;
+        let allLogs = [];
+        let filteredLogs = [];
+
+        function openLogsModal() {
+            document.getElementById('logsModal').style.display = 'block';
+            loadActivityLogs();
+            renderLogs();
+        }
+
+        function closeLogsModal() {
+            document.getElementById('logsModal').style.display = 'none';
+        }
+
+        function loadActivityLogs() {
+            // Get logs from localStorage or initialize
+            allLogs = JSON.parse(localStorage.getItem('activityLogs')) || [];
+            
+            // If no logs exist, seed with sample data
+            if (allLogs.length === 0) {
+                allLogs = generateSampleLogs();
+                localStorage.setItem('activityLogs', JSON.stringify(allLogs));
+            }
+            
+            filteredLogs = [...allLogs];
+            updateStatistics();
+        }
+
+        function generateSampleLogs() {
+            const now = Date.now();
+            const logs = [
+                { timestamp: now, user: 'admin', action: 'Login Success', details: 'Multi-factor authentication completed', ip: '192.168.1.100', status: 'success', type: 'security_events' },
+                { timestamp: now - 900000, user: 'admin', action: 'System Settings Modified', details: 'Session timeout changed to 30 minutes', ip: '192.168.1.100', status: 'success', type: 'system_changes' },
+                { timestamp: now - 2700000, user: 'kjo', action: 'Access Denied', details: 'Attempted to access admin panel', ip: '192.168.1.105', status: 'failed', type: 'access_attempts' },
+                { timestamp: now - 5400000, user: 'admin', action: 'User Management', details: 'Modified user kjo2 permissions', ip: '192.168.1.100', status: 'success', type: 'user_activity' },
+                { timestamp: now - 7200000, user: 'kjo2', action: 'Data Upload', details: 'Uploaded SAP export file (2.3 MB)', ip: '192.168.1.106', status: 'success', type: 'data_operations' },
+                { timestamp: now - 9000000, user: 'admin', action: 'License Management', details: 'Renewed 3 Master licenses', ip: '192.168.1.100', status: 'success', type: 'system_changes' },
+                { timestamp: now - 10800000, user: 'kjo', action: 'Login Failed', details: 'Invalid password (Attempt 2/5)', ip: '192.168.1.105', status: 'warning', type: 'security_events' },
+                { timestamp: now - 14400000, user: 'kjo3', action: 'Dashboard View', details: 'Accessed Sales Performance dashboard', ip: '192.168.1.107', status: 'success', type: 'user_activity' },
+                { timestamp: now - 18000000, user: 'admin', action: 'Access Rights Modified', details: 'Updated permissions matrix for Business User role', ip: '192.168.1.100', status: 'success', type: 'system_changes' },
+                { timestamp: now - 21600000, user: 'kjo2', action: 'Template Selection', details: 'Changed dashboard template to Financial Overview', ip: '192.168.1.106', status: 'success', type: 'user_activity' },
+                { timestamp: now - 25200000, user: 'admin', action: 'User Created', details: 'New user kjo3 added with Business User role', ip: '192.168.1.100', status: 'success', type: 'user_activity' },
+                { timestamp: now - 28800000, user: 'kjo', action: 'Data Export', details: 'Exported dashboard data to Excel', ip: '192.168.1.105', status: 'success', type: 'data_operations' },
+                { timestamp: now - 32400000, user: 'admin', action: 'API Key Regenerated', details: 'New API key generated for integrations', ip: '192.168.1.100', status: 'success', type: 'security_events' },
+                { timestamp: now - 36000000, user: 'kjo2', action: 'Report Generated', details: 'Monthly analytics report created', ip: '192.168.1.106', status: 'success', type: 'data_operations' },
+                { timestamp: now - 43200000, user: 'kjo', action: 'Login Success', details: 'Standard authentication', ip: '192.168.1.105', status: 'success', type: 'security_events' }
+            ];
+            return logs;
+        }
+
+        function addActivityLog(action, details, status = 'success', type = 'user_activity') {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const log = {
+                timestamp: Date.now(),
+                user: currentUser ? currentUser.user_id : 'system',
+                action: action,
+                details: details,
+                ip: generateRandomIP(),
+                status: status,
+                type: type
+            };
+            
+            allLogs.unshift(log); // Add to beginning
+            
+            // Keep only last 1000 logs
+            if (allLogs.length > 1000) {
+                allLogs = allLogs.slice(0, 1000);
+            }
+            
+            localStorage.setItem('activityLogs', JSON.stringify(allLogs));
+        }
+
+        function generateRandomIP() {
+            return `192.168.1.${Math.floor(Math.random() * 255)}`;
+        }
+
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || { dateFormat: 'DD/MM/YYYY' };
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            let dateStr;
+            if (settings.dateFormat === 'MM/DD/YYYY') {
+                dateStr = `${month}/${day}/${year}`;
+            } else if (settings.dateFormat === 'YYYY-MM-DD') {
+                dateStr = `${year}-${month}-${day}`;
+            } else {
+                dateStr = `${day}/${month}/${year}`;
+            }
+            
+            return `${dateStr} ${hours}:${minutes}:${seconds}`;
+        }
+
+        function renderLogs() {
+            const tbody = document.getElementById('logsTableBody');
+            tbody.innerHTML = '';
+            
+            const start = (currentLogPage - 1) * logsPerPage;
+            const end = start + logsPerPage;
+            const logsToShow = filteredLogs.slice(start, end);
+            
+            logsToShow.forEach(log => {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid #eee';
+                row.style.transition = 'background 0.2s';
+                row.onmouseover = () => row.style.background = '#f8f9fa';
+                row.onmouseout = () => row.style.background = '';
+                
+                const statusColor = log.status === 'success' ? '#28a745' : log.status === 'failed' ? '#dc3545' : '#ffc107';
+                const statusBg = log.status === 'success' ? '#d4edda' : log.status === 'failed' ? '#f8d7da' : '#fff3cd';
+                
+                row.innerHTML = `
+                    <td style="padding: 12px; white-space: nowrap;">${formatDateTime(log.timestamp)}</td>
+                    <td style="padding: 12px;"><span style="background: #e7f3ff; color: #0066cc; padding: 4px 8px; border-radius: 4px; font-size: 13px;">${log.user}</span></td>
+                    <td style="padding: 12px; font-weight: 500;">${log.action}</td>
+                    <td style="padding: 12px; color: #666;">${log.details}</td>
+                    <td style="padding: 12px; font-family: monospace; font-size: 13px;">${log.ip}</td>
+                    <td style="padding: 12px;"><span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; text-transform: uppercase;">${log.status}</span></td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // Update pagination info
+            document.getElementById('logRangeStart').textContent = filteredLogs.length > 0 ? start + 1 : 0;
+            document.getElementById('logRangeEnd').textContent = Math.min(end, filteredLogs.length);
+            document.getElementById('logTotal').textContent = filteredLogs.length;
+        }
+
+        function updateStatistics() {
+            const now = Date.now();
+            const oneDayAgo = now - (24 * 60 * 60 * 1000);
+            
+            const todayLogs = allLogs.filter(log => log.timestamp >= oneDayAgo);
+            const failedLogins = allLogs.filter(log => log.timestamp >= oneDayAgo && log.action.includes('Login Failed')).length;
+            
+            document.getElementById('totalEventsToday').textContent = todayLogs.length;
+            document.getElementById('failedLogins').textContent = failedLogins;
+            document.getElementById('activeUsers').textContent = '4';
+            document.getElementById('criticalAlerts').textContent = '0';
+        }
+
+        function applyLogFilters() {
+            const fromDate = document.getElementById('logFromDate').value;
+            const toDate = document.getElementById('logToDate').value;
+            const logType = document.getElementById('logType').value;
+            const userFilter = document.getElementById('logUserFilter').value;
+            const searchText = document.getElementById('logSearch').value.toLowerCase();
+            
+            filteredLogs = allLogs.filter(log => {
+                // Date filter
+                if (fromDate) {
+                    const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+                    if (logDate < fromDate) return false;
+                }
+                if (toDate) {
+                    const logDate = new Date(log.timestamp).toISOString().split('T')[0];
+                    if (logDate > toDate) return false;
+                }
+                
+                // Type filter
+                if (logType !== 'all' && log.type !== logType) return false;
+                
+                // User filter
+                if (userFilter !== 'all' && log.user !== userFilter) return false;
+                
+                // Search filter
+                if (searchText) {
+                    const searchableText = `${log.action} ${log.details} ${log.user}`.toLowerCase();
+                    if (!searchableText.includes(searchText)) return false;
+                }
+                
+                return true;
+            });
+            
+            currentLogPage = 1;
+            renderLogs();
+        }
+
+        function resetLogFilters() {
+            document.getElementById('logFromDate').value = '';
+            document.getElementById('logToDate').value = '';
+            document.getElementById('logType').value = 'all';
+            document.getElementById('logUserFilter').value = 'all';
+            document.getElementById('logSearch').value = '';
+            
+            filteredLogs = [...allLogs];
+            currentLogPage = 1;
+            renderLogs();
+        }
+
+        function nextLogPage() {
+            const totalPages = Math.ceil(filteredLogs.length / logsPerPage);
+            if (currentLogPage < totalPages) {
+                currentLogPage++;
+                renderLogs();
+            }
+        }
+
+        function previousLogPage() {
+            if (currentLogPage > 1) {
+                currentLogPage--;
+                renderLogs();
+            }
+        }
+
+        function refreshLogs() {
+            loadActivityLogs();
+            renderLogs();
+            alert('✅ Logs Refreshed!\n\nActivity logs have been reloaded from storage.');
+        }
+
+        function exportLogs() {
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || { dateFormat: 'DD/MM/YYYY' };
+            const timestamp = formatDateTime(Date.now());
+            
+            alert('📥 Exporting Logs to CSV...\n\n' +
+                  `Total Logs: ${filteredLogs.length}\n` +
+                  `Date Format: ${settings.dateFormat}\n` +
+                  `Export Time: ${timestamp}\n\n` +
+                  'File: activity_logs_export.csv\n\n' +
+                  '✓ CSV generation simulated\n' +
+                  '✓ In production, file download would start\n\n' +
+                  'Note: This is a prototype. Real export would\n' +
+                  'generate and download actual CSV file.');
+        }
+
+        function clearOldLogs() {
+            const settings = JSON.parse(localStorage.getItem('systemSettings')) || { auditLogRetention: '365' };
+            const retentionDays = parseInt(settings.auditLogRetention);
+            
+            if (confirm(`⚠️ Clear Old Activity Logs?\n\n` +
+                       `This will delete logs older than ${retentionDays} days\n` +
+                       `based on your Data Retention policy.\n\n` +
+                       `Current total logs: ${allLogs.length}\n\n` +
+                       `This action cannot be undone. Continue?`)) {
+                
+                const cutoffTime = Date.now() - (retentionDays * 24 * 60 * 60 * 1000);
+                const beforeCount = allLogs.length;
+                allLogs = allLogs.filter(log => log.timestamp >= cutoffTime);
+                const deletedCount = beforeCount - allLogs.length;
+                
+                localStorage.setItem('activityLogs', JSON.stringify(allLogs));
+                loadActivityLogs();
+                renderLogs();
+                
+                alert(`✅ Old Logs Cleared!\n\n` +
+                      `Deleted: ${deletedCount} logs\n` +
+                      `Remaining: ${allLogs.length} logs\n` +
+                      `Retention Policy: ${retentionDays} days\n\n` +
+                      `Logs older than ${retentionDays} days have been removed.`);
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const userModal = document.getElementById('userModal');
+            const licenseModal = document.getElementById('licenseModal');
+            const accessModal = document.getElementById('accessModal');
+            const settingsModal = document.getElementById('settingsModal');
+            const logsModal = document.getElementById('logsModal');
+            const analyticsModal = document.getElementById('analyticsModal');
+            
+            if (event.target == userModal) {
+                closeUserModal();
+            }
+            if (event.target == licenseModal) {
+                closeLicenseModal();
+            }
+            if (event.target == accessModal) {
+                closeAccessModal();
+            }
+            if (event.target == settingsModal) {
+                closeSettingsModal();
+            }
+            if (event.target == logsModal) {
+                closeLogsModal();
+            }
+            if (event.target == analyticsModal) {
+                closeAnalyticsModal();
+            }
+        }
+    </script>
+</body>
+</html>

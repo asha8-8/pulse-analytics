@@ -1,0 +1,8 @@
+user_id,password,role
+admin,admin123,principal
+SCD_CIS,cis123,business_user
+kjo2,kjo456,master
+SCD_PUR,pur123,business_user
+SCD_WHS,whs123,business_user
+SCD_SRM,srm123,business_user
+SCD_MGR,mgr123,business_user

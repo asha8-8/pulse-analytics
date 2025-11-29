@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Order Delivery Status and Analysis - August 2025</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+    <style>
+        body { 
+            background-color: #f8f9fa; 
+            margin: 0;
+        /* Premium Header Styling */
+        .main-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .main-header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header-subtitle {
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+        .main-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .main-header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header-subtitle {
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 8px;
+            font-weight: 300;
+        }
+        .card { box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border: none; }
+        .footer { text-align: center; color: #888; margin-top: 40px; padding: 20px 0; border-top: 1px solid #eaeaea; font-size: 0.95rem; }
+        .info-icon { margin-left: 5px; color: #17a2b8; cursor: pointer; }
+        .table thead th { background: #e9ecef; }
+        
+        /* Premium Table Styling */
+        .premium-table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .premium-table {
+            margin: 0;
+            font-size: 0.8rem;
+        }
+        
+        .premium-table thead th {
+            background: #f2f2f2;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: none;
+            letter-spacing: 0;
+            padding: 8px 6px;
+            border: 1px solid #d0d0d0;
+            border-bottom: 2px solid #a0a0a0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .premium-table tbody td {
+            padding: 6px 4px;
+            border: 1px solid #e0e0e0;
+            vertical-align: middle;
+            font-size: 0.75rem;
+        }
+        
+        .premium-table tbody tr {
+            transition: all 0.1s ease;
+        }
+        
+        .premium-table tbody tr:hover {
+            background-color: #e8f4fd !important;
+        }
+        
+        .premium-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .premium-table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+        
+        /* DataTables Control Bar */
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 6px 10px;
+            margin-left: 6px;
+            font-size: 0.85rem;
+            width: 250px;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate {
+            text-align: center;
+            padding-top: 10px;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 6px 12px;
+            margin: 0 2px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+        }
+        
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        /* Compact table header */
+        .table-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-bottom: 1px solid #d0d0d0;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .table-header h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: #333;
+            display: inline-block;
+            font-weight: 600;
+        }
+        
+        .table-stats {
+            float: right;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 1px;
+        }
+        
+        /* Status badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .status-followed-up { background: #fff3cd; color: #856404; }
+        .status-partial { background: #cce5ff; color: #004085; }
+        .status-sent { background: #d4edda; color: #155724; }
+        .status-reminder { background: #f8d7da; color: #721c24; }
+        
+        /* Overdue days styling */
+        .overdue-low { color: #28a745; font-weight: 600; }
+        .overdue-medium { color: #fd7e14; font-weight: 600; }
+        .overdue-high { color: #dc3545; font-weight: 600; }
+        
+        /* Number alignment */
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        
+        /* Compact supplier names */
+        .supplier-name {
+            font-size: 0.75rem;
+            line-height: 1.1;
+            max-width: 180px;
+            word-wrap: break-word;
+        }
+        
+        /* Currency formatting */
+        .currency {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        
+        /* Latest update column */
+        .update-text {
+            font-size: 0.7rem;
+            line-height: 1.2;
+            max-width: 200px;
+            word-wrap: break-word;
+        }
+        
+        /* Custom scrollbar */
+        .premium-table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .premium-table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        .premium-table-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        .premium-table-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* KPI Container */
+        .kpi-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            padding: 25px 20px;
+            margin: 25px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .kpi-container-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+        
+        /* Enhanced Heading Styles */
+        .section-heading {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 25px 0 15px 0;
+            box-shadow: 0 3px 10px rgba(0,123,255,0.3);
+            border-left: 5px solid #0056b3;
+        }
+        
+        .kpi-container-title {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+            display: inline-block;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.3);
+        }
+        
+        .chart-card .card-header h5 {
+            color: #007bff;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .table-header h2 {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(0,123,255,0.3);
+        }
+        
+        .kpi-container-subtitle {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .kpi-card { 
+            transition: transform 0.2s; 
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kpi-card:hover { transform: translateY(-3px); }
+        .kpi-card .card-body {
+            padding: 20px 15px;
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .kpi-value { 
+            font-size: 2.2rem; 
+            font-weight: 700; 
+            margin: 8px 0; 
+            line-height: 1;
+        }
+        .kpi-label { 
+            font-size: 0.8rem; 
+            color: #666; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px; 
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .kpi-sublabel {
+            font-size: 0.7rem;
+            color: #888;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+        .kpi-icon { 
+            font-size: 1.8rem; 
+            margin-bottom: 8px; 
+            opacity: 0.8;
+        }
+        
+        /* Unified color scheme with borders */
+        .kpi-success { 
+            border-left: 5px solid #28a745; 
+            background: linear-gradient(135deg, #ffffff, #f8fff9);
+        }
+        .kpi-success .kpi-value { color: #28a745; }
+        .kpi-success .kpi-icon { color: #28a745; }
+        
+        .kpi-warning { 
+            border-left: 5px solid #fd7e14; 
+            background: linear-gradient(135deg, #ffffff, #fffaf6);
+        }
+        .kpi-warning .kpi-value { color: #fd7e14; }
+        .kpi-warning .kpi-icon { color: #fd7e14; }
+        
+        .kpi-danger { 
+            border-left: 5px solid #dc3545; 
+            background: linear-gradient(135deg, #ffffff, #fdf7f7);
+        }
+        .kpi-danger .kpi-value { color: #dc3545; }
+        .kpi-danger .kpi-icon { color: #dc3545; }
+        
+        .kpi-info { 
+            border-left: 5px solid #17a2b8; 
+            background: linear-gradient(135deg, #ffffff, #f6fbfc);
+        }
+        .kpi-info .kpi-value { color: #17a2b8; }
+        .kpi-info .kpi-icon { color: #17a2b8; }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1>Purchase Order Delivery Status and Analysis - August 2025</h1>
+            <div class="header-subtitle">SRM Division - KJO | Comprehensive PO Delivery Performance Report</div>
+        </div>
+    </header>
+    <main>
+    <div class="container">
+        <div class="alert alert-info" role="alert" aria-live="polite" style="background: linear-gradient(135deg, #e8f4fd, #f0f9ff); border-left: 5px solid #17a2b8; padding: 20px; line-height: 1.6;">
+            <div style="font-size: 1.1rem; margin-bottom: 15px;">
+                <strong style="color: #2c3e50;">📈 Executive Summary</strong>
+            </div>
+            <p style="margin-bottom: 12px; font-size: 1rem;">
+                Our delivery performance for 2025 shows <span style="background: #d4edda; padding: 2px 8px; border-radius: 4px; color: #155724; font-weight: 600;">strong results with 91.3% completion rate</span> across 287 total purchase orders. This demonstrates effective supplier follow-up and team capabilities that we are currently actively following up.
+            </p>
+        </div>
+        <div class="kpi-container">
+            <div class="kpi-container-header">
+                <h3 class="kpi-container-title">📊 Key Performance Indicators</h3>
+            </div>
+            <div class="row">
+            <div class="col-md-4 col-lg-2">
+                <div class="card kpi-card kpi-info">
+                    <div class="card-body">
+                        <div class="kpi-icon">�</div>
+                        <div class="kpi-label">Total POs</div>
+                        <div class="kpi-value">287</div>
+                        <div class="kpi-sublabel">Jan-Aug 2025</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card kpi-card kpi-success">
+                    <div class="card-body">
+                        <div class="kpi-icon">✅</div>
+                        <div class="kpi-label">Achievement</div>
+                        <div class="kpi-value">91.3%</div>
+                        <div class="kpi-sublabel">Completed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card kpi-card kpi-warning">
+                    <div class="card-body">
+                        <div class="kpi-icon">⏳</div>
+                        <div class="kpi-label">Pending</div>
+                        <div class="kpi-value">25</div>
+                        <div class="kpi-sublabel">Outstanding</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card kpi-card kpi-danger">
+                    <div class="card-body">
+                        <div class="kpi-icon">💰</div>
+                        <div class="kpi-label">Value Risk</div>
+                        <div class="kpi-value">₹16.0M</div>
+                        <div class="kpi-sublabel">Pending Amount</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card kpi-card kpi-warning">
+                    <div class="card-body">
+                        <div class="kpi-icon">📅</div>
+                        <div class="kpi-label">Avg Delay</div>
+                        <div class="kpi-value">43</div>
+                        <div class="kpi-sublabel">Days Overdue</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card kpi-card kpi-danger">
+                    <div class="card-body">
+                        <div class="kpi-icon">🚨</div>
+                        <div class="kpi-label">Critical</div>
+                        <div class="kpi-value">3</div>
+                        <div class="kpi-sublabel">>100 Days</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="row my-5">
+            <div class="col-md-6">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">📊 Top 10 Suppliers by Pending Value</h5>
+                        <small class="text-muted">Financial impact of pending orders</small>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="topSuppliersByValueChart" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">⏰ Top 10 Suppliers by Average Overdue Days</h5>
+                        <small class="text-muted">Delivery performance analysis</small>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="topSuppliersByOverdueChart" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="premium-table-container">
+            <div class="table-header">
+                <h2>📋 Detailed Pending Purchase Orders</h2>
+                <div class="table-stats">25 Total Records | ₹16.0M at Risk</div>
+                <div style="clear: both;"></div>
+            </div>
+            <table id="poTable" class="table premium-table" width="100%">
+                <thead>
+                    <tr>
+                        <th class="text-center">SL.No.</th>
+                        <th>PO Number</th>
+                        <th class="text-center">PO Date</th>
+                        <th>Supplier Name</th>
+                        <th class="text-right">Net Value (₹)</th>
+                        <th class="text-center">Delivery Date</th>
+                        <th class="text-center">Overdue Days</th>
+                        <th class="text-center">Pur.Grp</th>
+                        <th class="text-center">Status</th>
+                        <th>Latest Update</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table data. For accessibility, consider adding scope="row" to first <td> in each row. -->
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td><strong>4500006698</strong></td>
+                        <td class="text-center">06-05-2024</td>
+                        <td class="supplier-name">SULZER SAUDI PUMP COMPANY LTD</td>
+                        <td class="text-right currency">1,87,942.00</td>
+                        <td class="text-center">21-01-2025</td>
+                        <td class="text-center overdue-high">188</td>
+                        <td class="text-center">M10</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td class="update-text">Supplier confirmed that the order will be deliver in July 2025 Some of this materail are deliver as partial.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">2</td>
+                        <td><strong>4500006924</strong></td>
+                        <td class="text-center">19-01-2025</td>
+                        <td class="supplier-name">GASKET FACTORY BR. OF AL-IMAN FACTO</td>
+                        <td class="text-right currency">72,088.20</td>
+                        <td class="text-center">30-03-2025</td>
+                        <td class="text-center overdue-high">120</td>
+                        <td class="text-center">M27</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td class="update-text">Buyer informed that, the PO has been signed in the terms of 45 days credit period after delivery of material.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">3</td>
+                        <td><strong>4500006912</strong></td>
+                        <td class="text-center">01-08-2025</td>
+                        <td class="supplier-name">SAUDI FAL COMPANY LTD</td>
+                        <td class="text-right currency">34,907.00</td>
+                        <td class="text-center">04-10-2025</td>
+                        <td class="text-center overdue-high">109</td>
+                        <td class="text-center">M10</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td class="update-text">Reminder has been send on 30-06-2025. No response. Send reminder on 22.07.2025. Supplier sad by end of Aug they will deliver.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">4</td>
+                        <td><strong>4500006672</strong></td>
+                        <td class="text-center">05-07-2024</td>
+                        <td class="supplier-name">ALI ABDULLAH AL-TAMIMI COMPANY</td>
+                        <td class="text-right currency">5,96,718.18</td>
+                        <td class="text-center">05-11-2025</td>
+                        <td class="text-center overdue-medium">78</td>
+                        <td class="text-center">M09</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">e-Mail does not going Supplier asking for approval for partial delivery ( waiting for approval )</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">5</td>
+                        <td><strong>4500006933</strong></td>
+                        <td class="text-center">02-02-2025</td>
+                        <td class="supplier-name">ARABIAN KARIM TRADING LLC</td>
+                        <td class="text-right currency">9,750.00</td>
+                        <td class="text-center">29-05-2025</td>
+                        <td class="text-center overdue-medium">60</td>
+                        <td class="text-center">M21</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Supplier confirmed that the material would be delivered within 6-8weeks from 12/06/2025</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">6</td>
+                        <td><strong>4500006647</strong></td>
+                        <td class="text-center">03-12-2024</td>
+                        <td class="supplier-name">AL HAJRI GULF GENERAL TRADING CON</td>
+                        <td class="text-right currency">1,88,476.20</td>
+                        <td class="text-center">06-01-2025</td>
+                        <td class="text-center overdue-medium">57</td>
+                        <td class="text-center">M21</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Supplier response materials will be delivered by the second week of July.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">7</td>
+                        <td><strong>4500006808</strong></td>
+                        <td class="text-center">24-09-2024</td>
+                        <td class="supplier-name">ALI ABDULLAH AL-TAMIMI COMPANY</td>
+                        <td class="text-right currency">41,345.00</td>
+                        <td class="text-center">17-06-2025</td>
+                        <td class="text-center overdue-medium">41</td>
+                        <td class="text-center">M27</td>
+                        <td class="text-center"><span class="status-badge status-partial">Partial Delivery</span></td>
+                        <td style="font-size: 0.75rem;">Reminder has been send on 08.07.2025. Supplier asking for approval for partial delivery ( waiting for approval ) partial delivery has been approved on 24.07.2025. itme #3 recived only and itme # 1,2 are not recived yet</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">8</td>
+                        <td><strong>4800001789</strong></td>
+                        <td class="text-center">05-12-2025</td>
+                        <td class="supplier-name">FAISAL AHMED S ALRUBAYA TRADING EST</td>
+                        <td class="text-right currency">1,03,551.20</td>
+                        <td class="text-center">18-06-2025</td>
+                        <td class="text-center overdue-medium">40</td>
+                        <td class="text-center">M24</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Reminder has been send on 02.07.2025. this PO taking care by Mr.Yasser</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">9</td>
+                        <td><strong>4800001742</strong></td>
+                        <td class="text-center">29-12-2024</td>
+                        <td class="supplier-name">THUWAINY TRADING COMPANY</td>
+                        <td class="text-right currency">15,902.00</td>
+                        <td class="text-center">29-06-2025</td>
+                        <td class="text-center overdue-low">29</td>
+                        <td class="text-center">M09</td>
+                        <td class="text-center"><span class="status-badge status-sent">Sent</span></td>
+                        <td style="font-size: 0.75rem;">on 04.08.2025. extend the delivery date of your subject Purchase Order until 31st October, 2025, instead of 29th June, 2025</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">10</td>
+                        <td><strong>4500006944</strong></td>
+                        <td class="text-center">02-11-2025</td>
+                        <td class="supplier-name">SULZER SAUDI PUMP COMPANY LTD</td>
+                        <td class="text-right currency">82,994.00</td>
+                        <td class="text-center">30-06-2025</td>
+                        <td class="text-center overdue-low">28</td>
+                        <td class="text-center">M09</td>
+                        <td class="text-center"><span class="status-badge status-partial">Partial Delivery</span></td>
+                        <td style="font-size: 0.75rem;">sent on 04.08.2025. Reminder!! Sent on 6.8.2025 We will be dispatching this order by 25.08.2025. We are ready with all the lines except PO line nos. 16 and 31 as of now.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">11</td>
+                        <td><strong>4500006967</strong></td>
+                        <td class="text-center">13-03-2025</td>
+                        <td class="supplier-name">ADVANCED LOGISITICS TRAD CONT E</td>
+                        <td class="text-right currency">6,90,726.00</td>
+                        <td class="text-center">07-08-2025</td>
+                        <td class="text-center overdue-low">20</td>
+                        <td class="text-center">M21</td>
+                        <td class="text-center"><span class="status-badge status-partial">Partial Delivery</span></td>
+                        <td style="font-size: 0.75rem;">sent on 04.08.2025. supplier response by end of this month item #32 to 61 recived and item 1 to 31 still pending</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">12</td>
+                        <td><strong>4500006972</strong></td>
+                        <td class="text-center">17-03-2025</td>
+                        <td class="supplier-name">ARABIAN KARIM TRADING LLC</td>
+                        <td class="text-right currency">1,25,615.00</td>
+                        <td class="text-center">07-09-2025</td>
+                        <td class="text-center overdue-low">19</td>
+                        <td class="text-center">M24</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">sent on 04.08.2025. Reminder!! Sent on 6.8.2025. Supplier ask for partial delivery.1108.2025. with Abdulaziz as CIS approval.20.08.2025.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">13</td>
+                        <td><strong>4500006869</strong></td>
+                        <td class="text-center">27-11-2024</td>
+                        <td class="supplier-name">GULF POWER MARINE CO</td>
+                        <td class="text-right currency">98,404.00</td>
+                        <td class="text-center">28-07-2025</td>
+                        <td class="text-center overdue-medium">35</td>
+                        <td class="text-center">M09</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">sent on 04.08.2025. Supplier response It is under production and expected to deliver the material by October</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">14</td>
+                        <td><strong>4500006961</strong></td>
+                        <td class="text-center">03-11-2025</td>
+                        <td class="supplier-name">EL HOSS ENGINEERING AND TRANSPORT C</td>
+                        <td class="text-right currency">13,900.00</td>
+                        <td class="text-center">28-07-2025</td>
+                        <td class="text-center overdue-medium">35</td>
+                        <td class="text-center">M09</td>
+                        <td class="text-center"><span class="status-badge status-sent">Sent</span></td>
+                        <td style="font-size: 0.75rem;">on 04.08.2025. Reminder!! Sent on 6.8.2025.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">15</td>
+                        <td><strong>4500006918</strong></td>
+                        <td class="text-center">01-12-2025</td>
+                        <td class="supplier-name">ZAMIL GROUP TRADE AND SERVICES CO</td>
+                        <td class="text-right currency">95,375.00</td>
+                        <td class="text-center">30-07-2025</td>
+                        <td class="text-center overdue-medium">33</td>
+                        <td class="text-center">M09</td>
+                        <td class="text-center"><span class="status-badge status-sent">Sent</span></td>
+                        <td style="font-size: 0.75rem;">on 04.08.2025. they will deliver it within a week</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">16</td>
+                        <td><strong>4800001765</strong></td>
+                        <td class="text-center">04-08-2025</td>
+                        <td class="supplier-name">CHAMPION ARABIA COMPANY LTD</td>
+                        <td class="text-right currency">4,45,332.77</td>
+                        <td class="text-center">31-07-2025</td>
+                        <td class="text-center overdue-medium">32</td>
+                        <td class="text-center">M24</td>
+                        <td class="text-center"><span class="status-badge status-partial">Partial Delivery</span></td>
+                        <td style="font-size: 0.75rem;">partial Delivery waiting for line #3 and 5</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">17</td>
+                        <td><strong>4800001802</strong></td>
+                        <td class="text-center">07-07-2025</td>
+                        <td class="supplier-name">HAMED AL-QAHTANI UNIVERSAL MARKETS</td>
+                        <td class="text-right currency">62,802.80</td>
+                        <td class="text-center">03-08-2025</td>
+                        <td class="text-center overdue-low">29</td>
+                        <td class="text-center">M10</td>
+                        <td class="text-center"><span class="status-badge status-partial">Partial Delivery</span></td>
+                        <td style="font-size: 0.75rem;">itme # 1 to 10 are not deliver yet</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">18</td>
+                        <td><strong>4800001678</strong></td>
+                        <td class="text-center">08-11-2024</td>
+                        <td class="supplier-name">AL-JULAIAH TRADING CONT CO WLL</td>
+                        <td class="text-right currency">22,93,731.00</td>
+                        <td class="text-center">04-08-2025</td>
+                        <td class="text-center overdue-low">28</td>
+                        <td class="text-center">M10</td>
+                        <td class="text-center"><span class="status-badge status-reminder">Reminder</span></td>
+                        <td style="font-size: 0.75rem;">has been sent on 27.08.2025.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">19</td>
+                        <td><strong>4500007023</strong></td>
+                        <td class="text-center">24-04-2025</td>
+                        <td class="supplier-name">AL-JEEL MEDICAL TRADING CO LTD</td>
+                        <td class="text-right currency">1,61,835.00</td>
+                        <td class="text-center">07-08-2025</td>
+                        <td class="text-center overdue-low">25</td>
+                        <td class="text-center">M10</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Supplier sad the expected arrival date of the shipment is now October.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">20</td>
+                        <td><strong>4800001749</strong></td>
+                        <td class="text-center">26-01-2025</td>
+                        <td class="supplier-name">TAMIMI CO. COMMERCIAL DIVISION</td>
+                        <td class="text-right currency">28,682.29</td>
+                        <td class="text-center">09-08-2025</td>
+                        <td class="text-center overdue-low">23</td>
+                        <td class="text-center">M21</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Reminder #2 has been sent on 31.08.2025. Supplier sad \ Will get back to you by September 02, 2025</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">21</td>
+                        <td><strong>4500006985</strong></td>
+                        <td class="text-center">23-03-2025</td>
+                        <td class="supplier-name">FIRE FREEZE EST</td>
+                        <td class="text-right currency">17,196.00</td>
+                        <td class="text-center">17-08-2025</td>
+                        <td class="text-center overdue-low">15</td>
+                        <td class="text-center">M16</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Reminder has been sent on 27.08.2025. The order is expected to arrive within a maximum of 10-12 days. We will keep you updated on the further proceedings from 27.08.25.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">22</td>
+                        <td><strong>4500007108</strong></td>
+                        <td class="text-center">07-08-2025</td>
+                        <td class="supplier-name">ABDULLAH HASHIM IND GAS EQUIP CO</td>
+                        <td class="text-right currency">7,476.00</td>
+                        <td class="text-center">17-08-2025</td>
+                        <td class="text-center overdue-low">15</td>
+                        <td class="text-center">M10</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Reminder has been sent on 27.08.2025.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">23</td>
+                        <td><strong>4500006881</strong></td>
+                        <td class="text-center">02-12-2024</td>
+                        <td class="supplier-name">SHAHIG COMPANY</td>
+                        <td class="text-right currency">1,56,290.00</td>
+                        <td class="text-center">24-08-2025</td>
+                        <td class="text-center overdue-low">8</td>
+                        <td class="text-center">M21</td>
+                        <td class="text-center"><span class="status-badge status-followed-up">Followed-Up</span></td>
+                        <td style="font-size: 0.75rem;">Supplier sad the expected arrival date of the shipment by mid-September 2025.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">24</td>
+                        <td><strong>4500007067</strong></td>
+                        <td class="text-center">28-05-2025</td>
+                        <td class="supplier-name">AL-FAISALIAH MED MES SYS</td>
+                        <td class="text-right currency">1,46,113.00</td>
+                        <td class="text-center">28-08-2025</td>
+                        <td class="text-center overdue-low">4</td>
+                        <td class="text-center">M10</td>
+                        <td class="text-center"><span class="status-badge status-reminder">Reminder</span></td>
+                        <td style="font-size: 0.75rem;">has been sent on 27.08.2025.</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">25</td>
+                        <td><strong>4800001686</strong></td>
+                        <td class="text-center">09-09-2024</td>
+                        <td class="supplier-name">YUSUF BIN AHMED KANOO CO LTD</td>
+                        <td class="text-right currency">1,03,26,215.55</td>
+                        <td class="text-center">30-08-2025</td>
+                        <td class="text-center overdue-low">2</td>
+                        <td class="text-center">M09</td>
+                        <td class="text-center"><span class="status-badge status-partial">Partial Delivery</span></td>
+                        <td style="font-size: 0.75rem;">still waiting for itme #1,2,3,4,5 and 6 its not deliver yet.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </main>
+    <footer class="footer" role="contentinfo">
+        &copy; 2025 SRM Division.
+    </footer>
+    <!-- Scripts loaded at end for performance -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#poTable').DataTable({
+                "pageLength": 25,
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                "order": [[ 6, "desc" ]], // Sort by overdue days descending
+                "scrollX": true,
+                "autoWidth": false,
+                "compact": true,
+                "columnDefs": [
+                    { "width": "4%", "targets": 0 }, // SL.No
+                    { "width": "9%", "targets": 1 }, // PO Number
+                    { "width": "7%", "targets": 2 }, // PO Date
+                    { "width": "14%", "targets": 3 }, // Supplier Name
+                    { "width": "9%", "targets": 4 }, // Net Value
+                    { "width": "7%", "targets": 5 }, // Delivery Date
+                    { "width": "6%", "targets": 6 }, // Overdue Days
+                    { "width": "5%", "targets": 7 }, // Pur.Grp
+                    { "width": "9%", "targets": 8 }, // Status
+                    { "width": "30%", "targets": 9 } // Latest Update
+                ],
+                "dom": '<"row"<"col-sm-12"f>>' +
+                       '<"row"<"col-sm-12"tr>>' +
+                       '<"row"<"col-sm-12"p>>',
+                "language": {
+                    "search": "🔍 Quick Search:",
+                    "lengthMenu": "Show _MENU_",
+                    "info": "_START_-_END_ of _TOTAL_",
+                    "paginate": {
+                        "first": "⏮",
+                        "last": "⏭",
+                        "next": "▶",
+                        "previous": "◀"
+                    },
+                    "emptyTable": "No pending orders found",
+                    "zeroRecords": "No matching records found"
+                }
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+
+        // Top 10 Suppliers by Pending Value
+        var ctx1 = document.getElementById('topSuppliersByValueChart').getContext('2d');
+        var topSuppliersByValueChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'YUSUF BIN AHMED KANOO CO LTD',
+                    'AL-JULAIAH TRADING CONT CO WLL', 
+                    'ADVANCED LOGISITICS TRAD CONT E',
+                    'ALI ABDULLAH AL-TAMIMI COMPANY',
+                    'CHAMPION ARABIA COMPANY LTD',
+                    'AL HAJRI GULF GENERAL TRADING CON',
+                    'ARABIAN KARIM TRADING LLC',
+                    'AL-JEEL MEDICAL TRADING CO LTD',
+                    'SHAHIG COMPANY',
+                    'AL-FAISALIAH MED MES SYS'
+                ],
+                datasets: [{
+                    label: 'Pending Value (₹)',
+                    data: [10326215.55, 2293731, 690726, 638063.18, 445332.77, 188476.20, 135365, 161835, 156290, 146113],
+                    backgroundColor: [
+                        '#dc3545', '#e74c3c', '#f39c12', '#f1c40f', '#27ae60',
+                        '#2ecc71', '#3498db', '#9b59b6', '#34495e', '#95a5a6'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '₹' + context.parsed.x.toLocaleString('en-IN');
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Top 10 Suppliers by Average Overdue Days
+        var ctx2 = document.getElementById('topSuppliersByOverdueChart').getContext('2d');
+        var topSuppliersByOverdueChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: [
+                    'SULZER SAUDI PUMP COMPANY LTD',
+                    'GASKET FACTORY BR. OF AL-IMAN FACTO',
+                    'SAUDI FAL COMPANY LTD',
+                    'ALI ABDULLAH AL-TAMIMI COMPANY',
+                    'ARABIAN KARIM TRADING LLC',
+                    'AL HAJRI GULF GENERAL TRADING CON',
+                    'CHAMPION ARABIA COMPANY LTD',
+                    'HAMED AL-QAHTANI UNIVERSAL MARKETS',
+                    'AL-JULAIAH TRADING CONT CO WLL',
+                    'AL-JEEL MEDICAL TRADING CO LTD'
+                ],
+                datasets: [{
+                    label: 'Average Overdue Days',
+                    data: [108, 120, 109, 59.5, 60, 57, 32, 29, 28, 25],
+                    backgroundColor: function(context) {
+                        const value = context.parsed.x;
+                        if (value > 60) return '#dc3545'; // Red for >60 days
+                        if (value > 30) return '#f39c12'; // Orange for 30-60 days
+                        return '#28a745'; // Green for <30 days
+                    },
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.x + ' days overdue';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + ' days';
+                            }
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
