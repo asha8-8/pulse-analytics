@@ -3,7 +3,7 @@
 **PULSE** - Platform for Unified Live Smart Ecosystem  
 Enterprise analytics platform with role-based dashboards and interactive data visualization.
 
-### Pro Tip: Understanding Your Repository Structure
+### Pro Tip: Understanding Your Repository Structure1
 Your repository now has this structure:
 
 ```plaintext
